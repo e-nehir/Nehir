@@ -9,6 +9,8 @@ using System.IO;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using goldStore.Models.ViewModel;
+using goldStore.Areas.Panel.Models;
 
 namespace goldStore.Controllers
 {
@@ -158,5 +160,90 @@ namespace goldStore.Controllers
 
         }
 
+
+        [NonAction]
+        private int isExistInCard (int id)
+        {
+            List<BasketItem> card = (List<BasketItem>)Session["card"];
+            for (int i = 0; i < card.Count; i++)
+
+                if (card[i].product.productId.Equals(id))
+                    return i;
+            return -1;
+        }
+        [HttpPost]
+        public List<BasketItem>  AddCard(int productId, int quantity)
+        {
+            product _product = repoProduct.Get(productId);
+            {
+                if (Session["card"] == null)
+                {
+                    List<BasketItem> Card = new List<BasketItem>();
+                    Card.Add(new BasketItem()
+                    {
+                        Id = Guid.NewGuid(),
+                        product = _product,
+                        quantity = quantity,
+                        DateCreated = DateTime.Now
+
+                    });
+                    Session["card"] = Card;
+
+                    return (List<BasketItem>)Session["card"];
+
+                }
+
+                else
+                {
+                    List<BasketItem> card = (List<BasketItem>)Session["card"];
+                    int index = isExistInCard(productId);
+                    if (index != -1)
+                    {
+                        card[index].quantity += quantity;
+                    }
+                    else
+                    {
+                        card.Add(new BasketItem
+
+                        {
+                            product = _product,
+                            quantity = quantity,
+                            DateCreated = DateTime.Now
+                        });
+                    }
+
+                    Session["card"] = card;
+                   
+                }
+                return (List<BasketItem>)Session["card"];
+
+            }
+        }
+
+            public List<BasketItem> Remove (int productId)
+            {
+               
+                List<BasketItem> card = (List<BasketItem>)Session["card"];
+                if(card.Exists(x=>x.product.productId==productId))
+                {
+
+                    int index = isExistInCard(productId);
+                    card.RemoveAt(index);
+                    Session["card"] = card;
+                }
+            return (List<BasketItem>)Session["card"];
+
+
+        }
+
+        public ActionResult Basket()
+        {
+            return View((List<BasketItem>)Session["card"]);
+
+        }
+
+
+
+        }
+
     }
-}

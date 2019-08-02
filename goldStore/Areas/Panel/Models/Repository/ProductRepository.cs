@@ -70,5 +70,10 @@ namespace goldStore.Areas.Panel.Models.Repository
         {
             return _context.brand.ToList();
         }
+
+        internal product Get(object productId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

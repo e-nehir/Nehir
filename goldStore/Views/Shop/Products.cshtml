@@ -46,7 +46,7 @@
                                         <ul class="product__action">
                                             <li><a href="@Url.Action("WishList", "Account")"><i class="icon-heart icons"></i></a></li>
 
-                                            <li><a href="@Url.Action("Basket", "Shop")"><i class="icon-handbag icons"></i></a></li>
+                                            <li><a href="javascript:void(0)" id="addBasket" productId="@product.productId"><i class="icon-handbag icons"></i></a></li>
 
                                             <li><a href="@Url.Action("Compare", "Shop"))"><i class="icon-shuffle icons"></i></a></li>
                                         </ul>
@@ -95,7 +95,7 @@
                                                 @product.description
                                             </p>
                                             <div class="fr__list__btn">
-                                                <a class="fr__btn" href="@Url.Action("Basket", "Shop")">Sepete Ekle</a>
+                                                <a class="fr__btn" href="javascript:void(0);" id="addBasket" productId="@product.productId">Sepete Ekle</a>
                                             </div>
                                         </div>
                                     </div>
@@ -141,7 +141,26 @@
         $("#orderBy").change(function () {
             $("#pageSizeForm").submit();
         });
-    });
+
+
+        $("#addBasket").click(function () {
+            alert();
+            var productId = $(this).attr("productId");
+            var quantity = 1;
+            $.ajax({
+                url:'@Url.Action("AddCard","Shop")',
+                type: "POST",
+                data: { productId: productId, quantity: quantity },
+                success: function (response) {
+                    var List = '<div class"shp_single_product">';
+
+                }
+            });
+        
+            
+
+            });
+        });
 </script>
 
 

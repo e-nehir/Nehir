@@ -14,6 +14,14 @@ namespace goldStore.Areas.Panel.Models
     
     public partial class user
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public user()
+        {
+            this.orders = new HashSet<orders>();
+            this.wishlist = new HashSet<wishlist>();
+            this.coupons = new HashSet<coupons>();
+        }
+    
         public int userId { get; set; }
         public string firstName { get; set; }
         public string lastName { get; set; }
@@ -35,5 +43,11 @@ namespace goldStore.Areas.Panel.Models
         public Nullable<bool> subscribe { get; set; }
     
         public virtual role role { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<orders> orders { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<wishlist> wishlist { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<coupons> coupons { get; set; }
     }
 }

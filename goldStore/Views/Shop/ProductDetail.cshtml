@@ -42,7 +42,6 @@
                                         <img src="data:image/png;base64,@Convert.ToBase64String(item.image)" alt="full-image">
                                     </div>
                                 }
-
                             </div>
                         </div>
                         <!-- End Product Big Images -->
@@ -66,7 +65,7 @@
                 <div class="col-md-7 col-lg-7 col-sm-12 col-xs-12 smt-40 xmt-40">
                     <div class="ht__product__dtl">
                         <h2>@Model.productName</h2>
-                        
+
                         <ul class="rating">
                             <li><i class="icon-star icons"></i></li>
                             <li><i class="icon-star icons"></i></li>
@@ -83,30 +82,30 @@
                             <div class="sin__desc">
                                 <p><span>Stok Durumu:</span>@(Model.stock > 0 ? "Stokta Var" : "Stok Yok")</p>
                             </div>
-                           
+
                             <div class="sin__desc align--left">
                                 <p><span>Kategori:</span></p>
                                 <ul class="pro__cat__list">
                                     <li><a href="@Url.Action("Products","Shop",new {categoryId=Model.categoryId })">@Model.category.categoryName </a></li>
-                                   
+
                                 </ul>
                             </div>
-                            
+
                             <div class="sin__desc product__share__link">
                                 <p><span>Paylaş:</span></p>
                                 <ul class="pro__share">
                                     <li><a href="https://www.twitter.com/share?url=@Request.Url.AbsoluteUri\@Url.Action("ProductDetail","Shop",new { productId = Model.productId })" target="_blank"><i class="icon-social-twitter icons"></i></a></li>
-
                                     <li><a href="https://www.instagram.com/?url=@Request.Url.AbsoluteUri\@Url.Action("ProductDetail","Shop",new { productId = Model.productId })" target="_blank"><i class="icon-social-instagram icons"></i></a></li>
-
                                     <li><a href="https://www.facebook.com/sharer.php?u=@Request.Url.AbsoluteUri\@Url.Action("ProductDetail","Shop",new { productId = Model.productId })" target="_blank"><i class="icon-social-facebook icons"></i></a></li>
-
                                     <li><a href="https://plus.google.com/share?url=@Request.Url.AbsoluteUri\@Url.Action("ProductDetail","Shop",new { productId = Model.productId })" target="_blank"><i class="icon-social-google icons"></i></a></li>
-
                                     <li><a href="https://linkedn.com/share?url=@Request.Url.AbsoluteUri\@Url.Action("ProductDetail","Shop",new { productId = Model.productId })" target="_blank"><i class="icon-social-linkedin icons"></i></a></li>
 
-                                    
                                 </ul>
+                            </div>
+
+
+                            <div class="fr__list__btn">
+                                <a class="fr__btn" href="javascript:void(0);" id="addBasket" productId="@Model.productId">Sepete Ekle</a>
                             </div>
                         </div>
                     </div>
@@ -174,13 +173,35 @@
         </div>
     </div>
 </section>
-
 @{
     Html.RenderAction("PartialNewArrivals");
 }
 @{
     Html.RenderAction("PartialBrands");
 }
-
 @Html.Partial("~/Views/_Shared/_footer.cshtml")
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script type="text/javascript">
+    $(function () {
+       
+
+        $("#addBasket").click(function () {
+            alert();
+            var productId = $(this).attr("productId");
+            var quantity = 1;
+            $.ajax({
+                url:'@Url.Action("AddCard","Shop")',
+                type: "POST",
+                data: { productId: productId, quantity: quantity },
+                success: function (response) {
+                    var List = '<div class"shp_single_product">';
+
+                }
+            });
+
+
+
+            });
+        });
+</script>
 

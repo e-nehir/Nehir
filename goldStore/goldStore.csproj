@@ -1261,6 +1261,9 @@
     <Compile Include="Areas\Panel\Models\category.cs">
       <DependentUpon>nehirx.tt</DependentUpon>
     </Compile>
+    <Compile Include="Areas\Panel\Models\coupons.cs">
+      <DependentUpon>nehirx.tt</DependentUpon>
+    </Compile>
     <Compile Include="Areas\Panel\Models\Interface\IRepository.cs" />
     <Compile Include="Areas\Panel\Models\nehirx.Context.cs">
       <AutoGen>True</AutoGen>
@@ -1276,6 +1279,12 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>nehirx.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Areas\Panel\Models\orderDetals.cs">
+      <DependentUpon>nehirx.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Areas\Panel\Models\orders.cs">
+      <DependentUpon>nehirx.tt</DependentUpon>
     </Compile>
     <Compile Include="Areas\Panel\Models\product.cs">
       <DependentUpon>nehirx.tt</DependentUpon>
@@ -1294,6 +1303,9 @@
     <Compile Include="Areas\Panel\Models\user.cs">
       <DependentUpon>nehirx.tt</DependentUpon>
     </Compile>
+    <Compile Include="Areas\Panel\Models\wishlist.cs">
+      <DependentUpon>nehirx.tt</DependentUpon>
+    </Compile>
     <Compile Include="Areas\Panel\PanelAreaRegistration.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\ShopController.cs" />
@@ -1302,6 +1314,8 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Role.cs" />
+    <Compile Include="Models\ViewModel\BasketItem.cs" />
+    <Compile Include="Models\ViewModel\CheckOut.cs" />
     <Compile Include="Models\ViewModel\Login.cs" />
     <Compile Include="Models\ViewModel\Register.cs" />
     <Compile Include="Models\ViewModel\ResetPassword.cs" />
@@ -1448,6 +1462,7 @@
     <Content Include="Views\User\ResetPassword.cshtml" />
     <Content Include="Views\Account\MyProfile.cshtml" />
     <Content Include="Views\_Shared\_LayoutAccount.cshtml" />
+    <Content Include="Views\Shop\Basket.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

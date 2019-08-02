@@ -1,0 +1,165 @@
+﻿
+@model IEnumerable<goldStore.Models.ViewModel.BasketItem>
+
+@{
+    Layout = null;
+}
+
+
+@Html.Partial("~/Views/_Shared/_header.cshtml")
+
+<div class="ht__bradcaump__area" style="background: rgba(0, 0, 0, 0) url(images/bg/4.jpg) no-repeat scroll center center / cover ;">
+    <div class="ht__bradcaump__wrap">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="bradcaump__inner">
+                        <nav class="bradcaump-inner">
+                            <a class="breadcrumb-item" href="index.html">Home</a>
+                            <span class="brd-separetor"><i class="zmdi zmdi-chevron-right"></i></span>
+                            <span class="breadcrumb-item active">shopping cart</span>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="cart-main-area ptb--100 bg__white">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <form action="#">
+                    <div class="table-content table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="product-thumbnail">Resim</th>
+                                    <th class="product-name">Ürün</th>
+                                    <th class="product-price">Fiyat</th>
+                                    <th class="product-quantity">Adet</th>
+                                    <th class="product-subtotal">Tutar</th>
+                                    <th class="product-remove">Sil</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @foreach (var item in Model)
+                                {
+                                    if (item != null)
+                                    {
+                                        <tr id="@item.Id">
+                                            <td class="product-thumbnail">
+                                                <a href="#">
+                                                    <img src="@Url.Action("Thumbnail","Shop",new {width=290, height=385,Id=item.product.productId,_imageId=item.product.productImage.FirstOrDefault().imageId })" alt="product img" />
+                                                </a>
+                                            </td>
+                                            <td class="product-name">
+                                                <a href="#">@item.product.productName</a>
+                                                <ul class="pro__prize">
+                                                    <li class="old__prize">₺@item.product.oldPrice</li>
+                                                    <li>TL>@item.product.price</li>
+                                                </ul>
+                                            </td>
+                                            <td class="product-price"><span class="amount">₺@item.product.price</span></td>
+                                            <td class="product-quantity"><input type="number" value="@item.quantity" /></td>
+                                            <td class="product-subtotal">₺ @(item.quantity*item.product.price)</td>
+                                            <td class="product-remove"><a href="javascript:void(0);" id="deleteBasketItem" item="@item.Id" productId="@item.product.productId"><i class="icon-trash icons"></i></a></td>
+                                        </tr>
+                                    }
+
+                                }
+
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <div class="buttons-cart--inner">
+                                <div class="buttons-cart">
+                                    <a href="#">Continue Shopping</a>
+                                </div>
+                                <div class="buttons-cart checkout--btn">
+                                    <a href="#">update</a>
+                                    <a href="#">checkout</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 col-sm-12 col-xs-12">
+                            <div class="ht__coupon__code">
+                                <span>enter your discount code</span>
+                                <div class="coupon__box">
+                                    <input type="text" placeholder="">
+                                    <div class="ht__cp__btn">
+                                        <a href="#">enter</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12 col-xs-12 smt-40 xmt-40">
+                            <div class="htc__cart__total">
+                                <h6>cart total</h6>
+                                <div class="cart__desk__list">
+                                    <ul class="cart__desc">
+                                        <li>Toplam Tutar</li>
+                                        <li>Vergi</li>
+                                        <li>Teslimat</li>
+                                    </ul>
+                                    <ul class="cart__price">
+                                        <li>₺@Model.Sum(x => x.product.price * x.quantity)</li>
+                                        <li>₺@(Model.Sum(x => x.product.price * x.quantity)*0.18m)</li>
+                                        <li>0</li>
+                                    </ul>
+                                </div>
+                                <div class="cart__total">
+                                    <span>Toplam</span>
+                                    <span>₺@(Model.Sum(x => x.product.price * x.quantity)*1.18m)</span>
+                                </div>
+                                <ul class="payment__btn">
+                                    <li class="active"><a href="#">Ödeme</a></li>
+                                    <li><a href="#">continue shopping</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    Html.RenderAction("PartialBrands");
+}
+
+
+@Html.Partial("~/Views/_Shared/_footer.cshtml")
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script type="text/javascript">$(function () {
+        $("#deleteBasketItem").click(function () {
+
+            var itemId = $(this).attr("item");
+            var productId = $(this).attr("productId");
+
+            $.ajax( {
+                type: 'POST',
+                    url: '@Url.Action("Remove","Shop")',
+                    data: { productId: productId },
+                success: function (response) {
+                    $("tr#" + itemId).fadeOut(1000);
+                    location.reload();
+                }
+            }
+                
+                ) 
+
+
+        });
+});
+    </script>
