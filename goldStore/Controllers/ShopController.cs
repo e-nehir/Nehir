@@ -160,7 +160,7 @@ namespace goldStore.Controllers
 
         }
 
-
+        //deneme
         [NonAction]
         private int isExistInCard (int id)
         {
