@@ -1,5 +1,6 @@
 ﻿@model PagedList.IPagedList<goldStore.Areas.Panel.Models.product>
 @using PagedList.Mvc
+
 @{
     ViewBag.Title = "Products";
     Layout = "~/Views/_Shared/_LayoutShop.cshtml";
@@ -46,7 +47,7 @@
                                         <ul class="product__action">
                                             <li><a href="@Url.Action("WishList", "Account")"><i class="icon-heart icons"></i></a></li>
 
-                                            <li><a href="javascript:void(0)" id="addBasket" productId="@product.productId"><i class="icon-handbag icons"></i></a></li>
+                                            <li><a href="@Url.Action("AddCard","Shop",new {productId=product.productId,quantity=1 })" id="addBasket" productId="@product.productId"><i class="icon-handbag icons"></i></a></li>
 
                                             <li><a href="@Url.Action("Compare", "Shop"))"><i class="icon-shuffle icons"></i></a></li>
                                         </ul>
@@ -76,7 +77,8 @@
                                     <div class="ht__list__product">
                                         <div class="ht__list__thumb">
                                             <a href="@Url.Action("ProductDetail", "Shop", new { productId = product.productId })">
-                                            <img src="data:image/png;base64,@Convert.ToBase64String(@product.productImage.FirstOrDefault().image)" alt="product images"></a>
+                                                <img src="data:image/png;base64,@Convert.ToBase64String(@product.productImage.FirstOrDefault().image)" alt="product images">
+                                            </a>
                                         </div>
                                         <div class="htc__list__details">
                                             <h2><a href="@Url.Action("ProductDetail", "Shop", new { productId = product.productId })">@product.productName </a></h2>
@@ -113,16 +115,16 @@
         <!-- Start Pagenation -->
         <div class="row">
             <div class="col-xs-12">
-            
+
                 <ul class="htc__pagenation">
 
-                 @Html.PagedListPager(Model, page => Url.Action("Products", new
-                     {
-                         page,
-                         PageSize = TempData["PageSize"],
-                         orderBy = TempData["orderby"]
+                    @Html.PagedListPager(Model, page => Url.Action("Products", new
+                        {
+                            page,
+                            PageSize = TempData["PageSize"],
+                            orderBy = TempData["orderby"]
 
-                     }))
+                        }))
 
 
                 </ul>
@@ -130,7 +132,7 @@
         </div>
         <!-- End Pagenation -->
     }
-    </div>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <script type="text/javascript">
     $(function () {
@@ -142,25 +144,25 @@
             $("#pageSizeForm").submit();
         });
 
-
-        $("#addBasket").click(function () {
-            alert();
+        // add basket
+        @*$("a#addBasket").click(function() {
             var productId = $(this).attr("productId");
             var quantity = 1;
             $.ajax({
-                url:'@Url.Action("AddCard","Shop")',
+                url:'@Url.Action("addCard","Shop")',
                 type: "POST",
-                data: { productId: productId, quantity: quantity },
-                success: function (response) {
-                    var List = '<div class"shp_single_product">';
 
+                data: {productId:productId, quantity: quantity },
+                success: function(response){
+
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(thrownError);
                 }
             });
-        
-            
-
-            });
-        });
+        });*@
+    });
 </script>
 
 

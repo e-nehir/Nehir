@@ -25,6 +25,8 @@
         <AssociationConnector Association="goldstoreModel.FK__wishlist__userIs__2B3F6F97" />
         <EntityTypeShape EntityType="goldstoreModel.coupons" Width="1.5" PointX="7.25" PointY="10.25" />
         <AssociationConnector Association="goldstoreModel.FK__coupons__userId__2E1BDC42" />
+        <EntityTypeShape EntityType="goldstoreModel.Payment" Width="1.5" PointX="7.375" PointY="0.875" />
+        <AssociationConnector Association="goldstoreModel.FK__orders__paymentT__38996AB5" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

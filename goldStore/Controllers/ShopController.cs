@@ -11,6 +11,10 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using goldStore.Models.ViewModel;
 using goldStore.Areas.Panel.Models;
+using System.Net.Configuration;
+using System.Net.Mail;
+using System.Net;
+using System.Configuration;
 
 namespace goldStore.Controllers
 {
@@ -18,7 +22,10 @@ namespace goldStore.Controllers
     {
         ProductRepository repoProduct = new ProductRepository(new Areas.Panel.Models.goldstoreEntities());
         CategoryRepository repoCategory = new CategoryRepository(new Areas.Panel.Models.goldstoreEntities());
-        BrandRepository repoBrand= new BrandRepository(new Areas.Panel.Models.goldstoreEntities());
+        BrandRepository repoBrand = new BrandRepository(new Areas.Panel.Models.goldstoreEntities());
+        UserRepository repoUser = new UserRepository(new Areas.Panel.Models.goldstoreEntities());
+        OrderRepository repoOrder = new OrderRepository(new Areas.Panel.Models.goldstoreEntities());
+        OrderDetailRepository repoOrderDetail = new OrderDetailRepository(new Areas.Panel.Models.goldstoreEntities());
         // GET: Shop
         public ActionResult Index()
         {
@@ -45,7 +52,7 @@ namespace goldStore.Controllers
         }
 
         // ürünleri gösteren method
-        public ActionResult Products(int?brandId,int?categoryId,decimal?min,decimal?max, int? page, int? PageSize, int? orderBy)
+        public ActionResult Products(int? brandId, int? categoryId, decimal? min, decimal? max, int? page, int? PageSize, int? orderBy)
         {
             ViewBag.orderBy = new List<SelectListItem>() {
                 new SelectListItem { Text = "Fiyat", Value = "1", Selected = true },
@@ -67,12 +74,12 @@ namespace goldStore.Controllers
 
             var result = repoProduct.GetAll();
             // eğer markaya göre bir filtreleme istendiğinde
-            if ( brandId!=null)
+            if (brandId != null)
             {
                 result = result.Where(x => x.brandId == brandId).ToList();
             }
             // eğer kategoriye göre bir filtreleme istendiğinde
-            else if (categoryId!=null)
+            else if (categoryId != null)
             {
                 result = result.Where(x => x.categoryId == categoryId).ToList();
             }
@@ -80,29 +87,29 @@ namespace goldStore.Controllers
             else if (max != null && min != null)
             {
                 result = result.Where(x => x.price >= min && x.price <= max).ToList();
-               /* TempData["min"] = min;
-                TempData.Keep("min");
-                TempData["max"] = max;
-                TempData.Keep("max");*/
+                /* TempData["min"] = min;
+                 TempData.Keep("min");
+                 TempData["max"] = max;
+                 TempData.Keep("max");*/
             }
             // order by Fiyat seçilmişse
-            else if (orderBy ==1)
+            else if (orderBy == 1)
             {
                 result = result.OrderBy(x => x.price).ToList();
                 TempData["orderby"] = 1;
                 TempData.Keep("orderby");
             }
             // order by isim seçilmişse
-            else if (orderBy ==2)
+            else if (orderBy == 2)
             {
                 result = result.OrderBy(x => x.productName).ToList();
                 TempData["orderby"] = 2;
                 TempData.Keep("orderby");
             }
 
-            return View(result.ToPagedList(_page,_pageSize));
+            return View(result.ToPagedList(_page, _pageSize));
         }
-        
+
         // ürün detayı
         public ActionResult ProductDetail(int productId)
         {
@@ -160,90 +167,250 @@ namespace goldStore.Controllers
 
         }
 
-        //deneme
         [NonAction]
-        private int isExistInCard (int id)
+        private int isExistInCard(int id)
         {
             List<BasketItem> card = (List<BasketItem>)Session["card"];
             for (int i = 0; i < card.Count; i++)
-
                 if (card[i].product.productId.Equals(id))
                     return i;
             return -1;
         }
-        [HttpPost]
-        public List<BasketItem>  AddCard(int productId, int quantity)
+
+        public ActionResult AddCard(int productId, int quantity)
         {
             product _product = repoProduct.Get(productId);
+            if (Session["card"] == null)
             {
-                if (Session["card"] == null)
+                List<BasketItem> Card = new List<BasketItem>();
+                Card.Add(new BasketItem()
                 {
-                    List<BasketItem> Card = new List<BasketItem>();
-                    Card.Add(new BasketItem()
+                    Id = Guid.NewGuid(),
+                    product = _product,
+                    quantity = quantity,
+                    DateCreated = DateTime.Now
+                });
+                Session["card"] = Card;
+            }
+            else
+            {
+                List<BasketItem> card = (List<BasketItem>)Session["card"];
+                // sepette eklenen ürünün  sepetteki sıra numarasına bakılır. varsa sepetteki sıra no gönderilir, yoksa -1 değeri gönderilir.
+                int index = isExistInCard(productId);
+                // sepette eklenen ürün varsa
+                if (index != -1)
+                {
+                    // sadece adedini gelen quantity kadar arttıracak.
+                    card[index].quantity += quantity;
+                }
+                // sepette girilen ürün yoksa 
+                else
+                {
+                    // sepete ekle
+                    card.Add(new BasketItem
                     {
-                        Id = Guid.NewGuid(),
                         product = _product,
                         quantity = quantity,
                         DateCreated = DateTime.Now
-
                     });
-                    Session["card"] = Card;
-
-                    return (List<BasketItem>)Session["card"];
-
                 }
-
-                else
-                {
-                    List<BasketItem> card = (List<BasketItem>)Session["card"];
-                    int index = isExistInCard(productId);
-                    if (index != -1)
-                    {
-                        card[index].quantity += quantity;
-                    }
-                    else
-                    {
-                        card.Add(new BasketItem
-
-                        {
-                            product = _product,
-                            quantity = quantity,
-                            DateCreated = DateTime.Now
-                        });
-                    }
-
-                    Session["card"] = card;
-                   
-                }
-                return (List<BasketItem>)Session["card"];
+                Session["card"] = card;
 
             }
+            return RedirectToAction("Index");
+            // return Json((List<BasketItem>)Session["card"],JsonRequestBehavior.AllowGet);
         }
-
-            public List<BasketItem> Remove (int productId)
+        // sepetteki elemanı silme
+        public void Remove(int productId)
+        {
+            List<BasketItem> card = (List<BasketItem>)Session["card"];
+            if (card.Exists(x => x.product.productId == productId))
             {
-               
-                List<BasketItem> card = (List<BasketItem>)Session["card"];
-                if(card.Exists(x=>x.product.productId==productId))
-                {
-
-                    int index = isExistInCard(productId);
-                    card.RemoveAt(index);
-                    Session["card"] = card;
-                }
-            return (List<BasketItem>)Session["card"];
-
+                int index = isExistInCard(productId);
+                card.RemoveAt(index);
+                Session["card"] = card;
+            }
+          
 
         }
 
         public ActionResult Basket()
         {
             return View((List<BasketItem>)Session["card"]);
-
         }
 
+        //[Authorize(Roles = "User")]
+        //public ActionResult CheckOut()
+        //{
+        //    if (!User.Identity.IsAuthenticated)
+        //    {
+        //        return RedirectToAction("Login", "User");
+        //    }
+        //    user availableUser = repoUser.GetAll().Where(x => x.email == User.Identity.Name).FirstOrDefault();
 
+        //    return View(model);
+
+        //}
+        //public ActionResult completeCheckOut()
+        //{
+
+        //    string message = "";
+        //    if (!User.Identity.IsAuthenticated)
+        //    {
+        //        return RedirectToAction("Login", "User");
+        //    }
+        //    user availableUser = db.user.Where(x => x.Email == User.Identity.Name).FirstOrDefault();
+        //    orders newOrder = new orders()
+        //    {
+        //        orderDate = DateTime.Now,
+        //        customerId = availableUser.userId
+
+        //    };
+        //    db.orders.Add(newOrder);
+        //    db.SaveChanges();
+
+        //    if (Session["card"] != null)
+        //    {
+        //        List<BasketItem> Basket = (List<BasketItem>)Session["card"];
+        //        orderDetails newOrderDetail = new orderDetails();
+        //        foreach (var item in Basket)
+        //        {
+        //            newOrderDetail.orderId = newOrder.orderId;
+        //            newOrderDetail.productId = item.product.productId;
+        //            newOrderDetail.quantity = item.quantity;
+
+        //            db.orderDetails.Add(newOrderDetail);
+        //            db.SaveChanges();
+        //        }
+        //        // mail Gönderecek
+        //        SendOrderInfo(availableUser.email);
+        //        message = " Sipariş işlemi tamamlandı. siparişiniz ile ilgili bilgi mailinize gönderilmiştir. <br/>" +
+        //          "Ecommerce sayfanızda sipariş detaylarını görebilirisiniz. Detay için aşağıdaki linke tıklayınız" +
+        //              "<a href='/Account/MyOrders'></a> ";
+
+        //    }
+        //    return Content(message);
+
+        //}
+        [NonAction]
+        public void SendOrderInfo(string emailID)
+        {
+            SmtpSection network = (SmtpSection)ConfigurationManager.GetSection("system.net/mailSettings/smtp");
+            try
+            {
+                var url = "/Account/MyOrders";
+                var link = Request.Url.AbsoluteUri.Replace(Request.Url.PathAndQuery, url);
+                var fromEmail = new MailAddress(network.Network.UserName, "Goldstore Sipariş Bilgisi");
+                var toEmail = new MailAddress(emailID);
+
+                string subject = "Goldstore Sipariş Bilgisi";
+                string body = "<br/><br/>Goldstore sayfanızda sipariş detaylarını görebilirisiniz. Detay için aşağıdaki linke tıklayınız" +
+                      " <br/><br/><a href='" + link + "'>" + link + "</a> ";
+                var smtp = new SmtpClient
+                {
+                    Host = network.Network.Host,
+                    Port = network.Network.Port,
+                    EnableSsl = network.Network.EnableSsl,
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    UseDefaultCredentials = network.Network.DefaultCredentials,
+                    Credentials = new NetworkCredential(network.Network.UserName, network.Network.Password)
+                };
+                using (var message = new MailMessage(fromEmail, toEmail)
+                {
+                    Subject = subject,
+                    Body = body,
+                    IsBodyHtml = true
+                })
+                    smtp.Send(message);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
 
         }
+            public ActionResult Checkout()
+            {
+                if(!User.Identity.IsAuthenticated)
+                {
+                    return RedirectToAction("Login", "User");
+
+                }
+                user user = repoUser.GetAll().Where(x => x.email == User.Identity.Name).FirstOrDefault();
+
+                return View(user);
+            }
+
+
+        [Authorize(Roles ="User")]
+        public ActionResult completeCheckout( user user)
+        {
+            string message = "";
+            if (!User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Login", "User");
+
+            }
+            user loginUser = repoUser.GetAll().Where(x => x.email == User.Identity.Name).FirstOrDefault();
+            orders newOrder = new orders();
+            newOrder.customerId = loginUser.userId;
+            if(user !=null)
+            {
+
+                if (string.IsNullOrEmpty(user.firstName))
+                {
+                    message = "isim alanını doldurunuz";
+                    ViewBag.message = message;
+                    return View();
+                }
+                else
+                    newOrder.firstname = user.firstName;
+                if (string.IsNullOrEmpty(user.lastName))
+                {
+                    message = "Soy isim alanını doldurunuz";
+                    ViewBag.message = message;
+                    return View();
+                }
+                else
+                    newOrder.lastname = user.lastName;
+                if (string.IsNullOrEmpty(user.address))
+                {
+                    message = "adres alanını doldurunuz";
+                    ViewBag.message = message;
+                    return View();
+                }
+                else
+                    newOrder.adress = user.address;
+
+                if (string.IsNullOrEmpty(user.city))
+                {
+                    message = "sehir alanını doldurunuz";
+                    ViewBag.message = message;
+                    return View();
+                }
+                else
+                    newOrder.city = user.city;
+                if (string.IsNullOrEmpty(user.phone))
+                {
+                    message = "telefon alanını doldurunuz";
+                    ViewBag.message = message;
+                    return View();
+                }
+                else
+                    newOrder.phone = user.phone;
+
+
+
+
+
+            }
+
+            return View();
+           
+        }
+    }
 
     }
+
+
+

@@ -1,13 +1,8 @@
-﻿
-@model IEnumerable<goldStore.Models.ViewModel.BasketItem>
-
+﻿@model IEnumerable<goldStore.Models.ViewModel.BasketItem>
 @{
     Layout = null;
 }
-
-
 @Html.Partial("~/Views/_Shared/_header.cshtml")
-
 <div class="ht__bradcaump__area" style="background: rgba(0, 0, 0, 0) url(images/bg/4.jpg) no-repeat scroll center center / cover ;">
     <div class="ht__bradcaump__wrap">
         <div class="container">
@@ -15,9 +10,9 @@
                 <div class="col-xs-12">
                     <div class="bradcaump__inner">
                         <nav class="bradcaump-inner">
-                            <a class="breadcrumb-item" href="index.html">Home</a>
+                            <a class="breadcrumb-item" href="@Url.Action("/")">Anasayfa</a>
                             <span class="brd-separetor"><i class="zmdi zmdi-chevron-right"></i></span>
-                            <span class="breadcrumb-item active">shopping cart</span>
+                            <span class="breadcrumb-item active">Alışveriş Sepeti</span>
                         </nav>
                     </div>
                 </div>
@@ -25,8 +20,6 @@
         </div>
     </div>
 </div>
-
-
 <div class="cart-main-area ptb--100 bg__white">
     <div class="container">
         <div class="row">
@@ -45,34 +38,38 @@
                                 </tr>
                             </thead>
                             <tbody>
-
-                                @foreach (var item in Model)
+                                @if (Model.Any())
                                 {
-                                    if (item != null)
+                                    foreach (var item in Model)
                                     {
-                                        <tr id="@item.Id">
-                                            <td class="product-thumbnail">
-                                                <a href="#">
-                                                    <img src="@Url.Action("Thumbnail","Shop",new {width=290, height=385,Id=item.product.productId,_imageId=item.product.productImage.FirstOrDefault().imageId })" alt="product img" />
-                                                </a>
-                                            </td>
-                                            <td class="product-name">
-                                                <a href="#">@item.product.productName</a>
-                                                <ul class="pro__prize">
-                                                    <li class="old__prize">₺@item.product.oldPrice</li>
-                                                    <li>TL>@item.product.price</li>
-                                                </ul>
-                                            </td>
-                                            <td class="product-price"><span class="amount">₺@item.product.price</span></td>
-                                            <td class="product-quantity"><input type="number" value="@item.quantity" /></td>
-                                            <td class="product-subtotal">₺ @(item.quantity*item.product.price)</td>
-                                            <td class="product-remove"><a href="javascript:void(0);" id="deleteBasketItem" item="@item.Id" productId="@item.product.productId"><i class="icon-trash icons"></i></a></td>
-                                        </tr>
+                                        if (item != null)
+                                        {
+                                            <tr id="@item.Id">
+                                                <td class="product-thumbnail">
+                                                    <a href="#">
+                                                        <img src="@Url.Action("Thumbnail", "Shop", new { width = 290, height = 385, Id = item.product.productId, _imageId = item.product.productImage.FirstOrDefault().imageId })" alt="product img" />
+                                                    </a>
+                                                </td>
+                                                <td class="product-name">
+                                                    <a href="#">@item.product.productName</a>
+                                                    <ul class="pro__prize">
+                                                        <li class="old__prize">₺@item.product.oldPrice</li>
+                                                        <li>₺>@item.product.price</li>
+                                                    </ul>
+                                                </td>
+                                                <td class="product-price"><span class="amount">₺@item.product.price</span></td>
+                                                <td class="product-quantity"><input type="number" value="@item.quantity" /></td>
+                                                <td class="product-subtotal">@(item.quantity * item.product.price)</td>
+                                                <td class="product-remove">
+                                                    <a href="javascript:void(0);" id="deleteBasketItem" item="@item.Id" productId="@item.product.productId">
+                                                        <i class="icon-trash icons"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
                                     }
 
                                 }
-
-
                             </tbody>
                         </table>
                     </div>
@@ -112,17 +109,17 @@
                                     </ul>
                                     <ul class="cart__price">
                                         <li>₺@Model.Sum(x => x.product.price * x.quantity)</li>
-                                        <li>₺@(Model.Sum(x => x.product.price * x.quantity)*0.18m)</li>
+                                        <li>₺ @(Model.Sum(x => x.product.price * x.quantity) * 0.18m)</li>
                                         <li>0</li>
                                     </ul>
                                 </div>
                                 <div class="cart__total">
-                                    <span>Toplam</span>
-                                    <span>₺@(Model.Sum(x => x.product.price * x.quantity)*1.18m)</span>
+                                    <span>Sipariş Toplam</span>
+                                    <span>₺@(Model.Sum(x => x.product.price * x.quantity) * 1.18m)</span>
                                 </div>
                                 <ul class="payment__btn">
-                                    <li class="active"><a href="#">Ödeme</a></li>
-                                    <li><a href="#">continue shopping</a></li>
+                                    <li class="active"><a href="#">Öde</a></li>
+                                    <li><a href="@Url.Action("/")">Alışverişe Devam Et</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -133,15 +130,40 @@
     </div>
 </div>
 
+
 @{
     Html.RenderAction("PartialBrands");
 }
-
-
 @Html.Partial("~/Views/_Shared/_footer.cshtml")
 
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
-<script type="text/javascript">$(function () {
+<script type="text/javascript">
+    $(function () {
+        //delete basketItem
+        $("#deleteBasketItem").click(function () {
+            var itemId = $(this).attr("item");
+            var productId = $(this).attr("productId");
+            $.ajax({
+                    type:'POST',
+                    url: '@Url.Action("Remove","Shop")',
+                    data: { productId: productId },
+                success: function (response) {
+                    $("tr#" + itemId).fadeOut(1000);
+                    //sayfayı yenile
+                    location.reload();
+                }
+
+
+
+            });
+
+        });
+
+    });
+</script>
+<script type="text/javascript">
+$(function () {
         $("#deleteBasketItem").click(function () {
 
             var itemId = $(this).attr("item");
@@ -156,10 +178,10 @@
                     location.reload();
                 }
             }
-                
-                ) 
+
+                )
 
 
         });
 });
-    </script>
+</script>

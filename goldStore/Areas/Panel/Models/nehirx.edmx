@@ -50,6 +50,22 @@
           <Property Name="orderId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="customerId" Type="int" />
           <Property Name="orderDate" Type="datetime" />
+          <Property Name="shipType" Type="bit" />
+          <Property Name="firstname" Type="varchar" MaxLength="50" />
+          <Property Name="lastname" Type="varchar" MaxLength="50" />
+          <Property Name="adress" Type="varchar" MaxLength="50" />
+          <Property Name="city" Type="varchar" MaxLength="50" />
+          <Property Name="postCode" Type="int" />
+          <Property Name="phone" Type="varchar" MaxLength="50" />
+          <Property Name="email" Type="varchar" MaxLength="50" />
+          <Property Name="paymentType" Type="int" />
+        </EntityType>
+        <EntityType Name="Payment">
+          <Key>
+            <PropertyRef Name="paymentId" />
+          </Key>
+          <Property Name="paymentId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="PaymentName" Type="varchar" MaxLength="50" />
         </EntityType>
         <EntityType Name="product">
           <Key>
@@ -102,6 +118,7 @@
           <Property Name="roleId" Type="int" />
           <Property Name="city" Type="varchar" MaxLength="50" />
           <Property Name="subscribe" Type="bit" />
+          <Property Name="postCode" Type="int" />
         </EntityType>
         <EntityType Name="wishlist">
           <Key>
@@ -133,6 +150,18 @@
             </Principal>
             <Dependent Role="orders">
               <PropertyRef Name="customerId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__orders__paymentT__38996AB5">
+          <End Role="Payment" Type="Self.Payment" Multiplicity="0..1" />
+          <End Role="orders" Type="Self.orders" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Payment">
+              <PropertyRef Name="paymentId" />
+            </Principal>
+            <Dependent Role="orders">
+              <PropertyRef Name="paymentType" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -242,6 +271,7 @@
           <EntitySet Name="coupons" EntityType="Self.coupons" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="orderDetals" EntityType="Self.orderDetals" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="orders" EntityType="Self.orders" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Payment" EntityType="Self.Payment" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="product" EntityType="Self.product" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="productImage" EntityType="Self.productImage" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="role" EntityType="Self.role" Schema="dbo" store:Type="Tables" />
@@ -253,6 +283,10 @@
           </AssociationSet>
           <AssociationSet Name="FK__orders__customer__239E4DCF" Association="Self.FK__orders__customer__239E4DCF">
             <End Role="user" EntitySet="user" />
+            <End Role="orders" EntitySet="orders" />
+          </AssociationSet>
+          <AssociationSet Name="FK__orders__paymentT__38996AB5" Association="Self.FK__orders__paymentT__38996AB5">
+            <End Role="Payment" EntitySet="Payment" />
             <End Role="orders" EntitySet="orders" />
           </AssociationSet>
           <AssociationSet Name="FK__product__brandId__1A14E395" Association="Self.FK__product__brandId__1A14E395">
@@ -432,6 +466,11 @@
             <End Role="user" EntitySet="user" />
             <End Role="coupons" EntitySet="coupons" />
           </AssociationSet>
+          <EntitySet Name="Payment" EntityType="goldstoreModel.Payment" />
+          <AssociationSet Name="FK__orders__paymentT__38996AB5" Association="goldstoreModel.FK__orders__paymentT__38996AB5">
+            <End Role="Payment" EntitySet="Payment" />
+            <End Role="orders" EntitySet="orders" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="user">
           <Key>
@@ -460,6 +499,7 @@
           <NavigationProperty Name="orders" Relationship="goldstoreModel.FK__orders__customer__239E4DCF" FromRole="user" ToRole="orders" />
           <NavigationProperty Name="wishlist" Relationship="goldstoreModel.FK__wishlist__userIs__2B3F6F97" FromRole="user" ToRole="wishlist" />
           <NavigationProperty Name="coupons" Relationship="goldstoreModel.FK__coupons__userId__2E1BDC42" FromRole="user" ToRole="coupons" />
+          <Property Name="postCode" Type="Int32" />
         </EntityType>
         <Association Name="FK__user__roleId__1CF15040">
           <End Type="goldstoreModel.role" Role="role" Multiplicity="0..1" />
@@ -493,6 +533,16 @@
           <Property Name="orderDate" Type="DateTime" Precision="3" />
           <NavigationProperty Name="orderDetals" Relationship="goldstoreModel.fkOrders" FromRole="orders" ToRole="orderDetals" />
           <NavigationProperty Name="user" Relationship="goldstoreModel.FK__orders__customer__239E4DCF" FromRole="orders" ToRole="user" />
+          <Property Name="shipType" Type="Boolean" />
+          <Property Name="firstname" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="lastname" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="adress" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="city" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="postCode" Type="Int32" />
+          <Property Name="phone" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="paymentType" Type="Int32" />
+          <NavigationProperty Name="Payment" Relationship="goldstoreModel.FK__orders__paymentT__38996AB5" FromRole="orders" ToRole="Payment" />
         </EntityType>
         <EntityType Name="wishlist">
           <Key>
@@ -595,6 +645,26 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="Payment">
+          <Key>
+            <PropertyRef Name="paymentId" />
+          </Key>
+          <Property Name="paymentId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PaymentName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="orders" Relationship="goldstoreModel.FK__orders__paymentT__38996AB5" FromRole="Payment" ToRole="orders" />
+        </EntityType>
+        <Association Name="FK__orders__paymentT__38996AB5">
+          <End Type="goldstoreModel.Payment" Role="Payment" Multiplicity="0..1" />
+          <End Type="goldstoreModel.orders" Role="orders" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Payment">
+              <PropertyRef Name="paymentId" />
+            </Principal>
+            <Dependent Role="orders">
+              <PropertyRef Name="paymentType" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -653,6 +723,7 @@
           <EntitySetMapping Name="user">
             <EntityTypeMapping TypeName="goldstoreModel.user">
               <MappingFragment StoreEntitySet="user">
+                <ScalarProperty Name="postCode" ColumnName="postCode" />
                 <ScalarProperty Name="subscribe" ColumnName="subscribe" />
                 <ScalarProperty Name="city" ColumnName="city" />
                 <ScalarProperty Name="roleId" ColumnName="roleId" />
@@ -687,6 +758,15 @@
           <EntitySetMapping Name="orders">
             <EntityTypeMapping TypeName="goldstoreModel.orders">
               <MappingFragment StoreEntitySet="orders">
+                <ScalarProperty Name="paymentType" ColumnName="paymentType" />
+                <ScalarProperty Name="email" ColumnName="email" />
+                <ScalarProperty Name="phone" ColumnName="phone" />
+                <ScalarProperty Name="postCode" ColumnName="postCode" />
+                <ScalarProperty Name="city" ColumnName="city" />
+                <ScalarProperty Name="adress" ColumnName="adress" />
+                <ScalarProperty Name="lastname" ColumnName="lastname" />
+                <ScalarProperty Name="firstname" ColumnName="firstname" />
+                <ScalarProperty Name="shipType" ColumnName="shipType" />
                 <ScalarProperty Name="orderDate" ColumnName="orderDate" />
                 <ScalarProperty Name="customerId" ColumnName="customerId" />
                 <ScalarProperty Name="orderId" ColumnName="orderId" />
@@ -714,6 +794,14 @@
                 <ScalarProperty Name="coupon" ColumnName="coupon" />
                 <ScalarProperty Name="Title" ColumnName="Title" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Payment">
+            <EntityTypeMapping TypeName="goldstoreModel.Payment">
+              <MappingFragment StoreEntitySet="Payment">
+                <ScalarProperty Name="PaymentName" ColumnName="PaymentName" />
+                <ScalarProperty Name="paymentId" ColumnName="paymentId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

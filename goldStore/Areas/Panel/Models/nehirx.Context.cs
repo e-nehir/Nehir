@@ -35,5 +35,6 @@ namespace goldStore.Areas.Panel.Models
         public virtual DbSet<orders> orders { get; set; }
         public virtual DbSet<wishlist> wishlist { get; set; }
         public virtual DbSet<coupons> coupons { get; set; }
+        public virtual DbSet<Payment> Payment { get; set; }
     }
 }

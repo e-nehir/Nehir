@@ -41,6 +41,7 @@ namespace goldStore.Areas.Panel.Models
         public Nullable<int> roleId { get; set; }
         public string city { get; set; }
         public Nullable<bool> subscribe { get; set; }
+        public Nullable<int> postCode { get; set; }
     
         public virtual role role { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
