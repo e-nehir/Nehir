@@ -329,23 +329,10 @@ namespace goldStore.Controllers
             }
 
         }
-            public ActionResult Checkout()
-            {
-                if(!User.Identity.IsAuthenticated)
-                {
-                    return RedirectToAction("Login", "User");
-
-                }
-                user user = repoUser.GetAll().Where(x => x.email == User.Identity.Name).FirstOrDefault();
-
-                return View(user);
-            }
-
-
-        [Authorize(Roles ="User")]
-        public ActionResult completeCheckout( user user)
+        public ActionResult Checkout(user user, bool? shipbox)
         {
             string message = "";
+            bool status;
             if (!User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Login", "User");
@@ -354,7 +341,103 @@ namespace goldStore.Controllers
             user loginUser = repoUser.GetAll().Where(x => x.email == User.Identity.Name).FirstOrDefault();
             orders newOrder = new orders();
             newOrder.customerId = loginUser.userId;
-            if(user !=null)
+            if (shipbox != false)
+            {
+
+                if (user != null)
+                {
+                    newOrder.shipType = false;
+
+
+                    if (string.IsNullOrEmpty(user.firstName))
+                    {
+                        message = "isim alanını doldurunuz";
+                        ViewBag.message = message;
+                        return View();
+                    }
+                    else
+                        newOrder.firstname = user.firstName;
+                    if (string.IsNullOrEmpty(user.lastName))
+                    {
+                        message = "Soy isim alanını doldurunuz";
+                        ViewBag.message = message;
+                        return View();
+                    }
+                    else
+                        newOrder.lastname = user.lastName;
+                    if (string.IsNullOrEmpty(user.address))
+                    {
+                        message = "adres alanını doldurunuz";
+                        ViewBag.message = message;
+                        return View();
+                    }
+                    else
+                        newOrder.adress = user.address;
+
+                    if (string.IsNullOrEmpty(user.city))
+                    {
+                        message = "sehir alanını doldurunuz";
+                        ViewBag.message = message;
+                        return View();
+                    }
+                    else
+                        newOrder.city = user.city;
+                    if (string.IsNullOrEmpty(user.phone))
+                    {
+                        message = "telefon alanını doldurunuz";
+                        ViewBag.message = message;
+                        return View();
+                    }
+                    else
+                        newOrder.phone = user.phone;
+                    newOrder.postCode = user.postCode;
+                    repoOrder.Save(newOrder);
+
+                    if(Session ["card"] !=null)
+                    {
+                        List<BasketItem> Basket = (List<BasketItem>)Session["card"];
+                        orderDetals neworderDetals = new orderDetals();
+
+                        foreach (var item in Basket)
+                        {
+                            neworderDetals.orderId = newOrder.orderId;
+                            neworderDetals.productId = item.product.productId;
+                            neworderDetals.quantity = item.quantity;
+                            repoOrderDetail.Save(neworderDetals);
+                        }
+
+                        SendOrderInfo(loginUser.email);
+                        message = "sipariş işlemi tamamlandı. siparişiniz ile ilgili bilgi mailinize gönderilmiştir<br/>" + "Goldstore sayfanızda sipariş detaylşarını görebilirsiniz.Detay için tıklayın";
+                        status = true;
+                          
+
+                    }
+
+                }
+
+                
+
+            }
+            return View();
+        }
+
+
+        [Authorize(Roles ="User")]
+        public ActionResult completeCheckout( user user)
+        {
+            string message = "";
+            bool status;
+            if (!User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Login", "User");
+
+            }
+            user loginUser = repoUser.GetAll().Where(x => x.email == User.Identity.Name).FirstOrDefault();
+            orders newOrder = new orders();
+            newOrder.customerId = loginUser.userId;
+            
+
+                if (user !=null)
             {
 
                 if (string.IsNullOrEmpty(user.firstName))

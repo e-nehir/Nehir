@@ -33,9 +33,9 @@ namespace goldStore.Areas.Panel.Models
         public string email { get; set; }
         public Nullable<int> paymentType { get; set; }
     
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<orderDetals> orderDetals { get; set; }
         public virtual user user { get; set; }
         public virtual Payment Payment { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<orderDetals> orderDetals { get; set; }
     }
 }

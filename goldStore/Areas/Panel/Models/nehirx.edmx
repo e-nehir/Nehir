@@ -36,12 +36,12 @@
         </EntityType>
         <EntityType Name="orderDetals">
           <Key>
-            <PropertyRef Name="orderId" />
-            <PropertyRef Name="productId" />
+            <PropertyRef Name="Id" />
           </Key>
           <Property Name="orderId" Type="int" Nullable="false" />
           <Property Name="productId" Type="int" Nullable="false" />
-          <Property Name="quantityId" Type="int" />
+          <Property Name="quantity" Type="int" />
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
         </EntityType>
         <EntityType Name="orders">
           <Key>
@@ -359,8 +359,8 @@
           <NavigationProperty Name="brand" Relationship="Self.FK__product__brandId__1A14E395" FromRole="product" ToRole="brand" />
           <NavigationProperty Name="category" Relationship="Self.FK__product__categor__1B0907CE" FromRole="product" ToRole="category" />
           <NavigationProperty Name="productImage" Relationship="Self.FK__productIm__produ__1BFD2C07" FromRole="product" ToRole="productImage" />
-          <NavigationProperty Name="orderDetals" Relationship="goldstoreModel.fkProduct" FromRole="product" ToRole="orderDetals" />
           <NavigationProperty Name="wishlist" Relationship="goldstoreModel.FK__wishlist__produc__2A4B4B5E" FromRole="product" ToRole="wishlist" />
+          <NavigationProperty Name="orderDetals" Relationship="goldstoreModel.fkProduct" FromRole="product" ToRole="orderDetals" />
         </EntityType>
         <EntityType Name="productImage">
           <Key>
@@ -438,17 +438,8 @@
             <End Role="role" EntitySet="role" />
             <End Role="user" EntitySet="user" />
           </AssociationSet>
-          <EntitySet Name="orderDetals" EntityType="goldstoreModel.orderDetals" />
           <EntitySet Name="orders" EntityType="goldstoreModel.orders" />
           <EntitySet Name="wishlist" EntityType="goldstoreModel.wishlist" />
-          <AssociationSet Name="fkOrders" Association="goldstoreModel.fkOrders">
-            <End Role="orders" EntitySet="orders" />
-            <End Role="orderDetals" EntitySet="orderDetals" />
-          </AssociationSet>
-          <AssociationSet Name="fkProduct" Association="goldstoreModel.fkProduct">
-            <End Role="product" EntitySet="product" />
-            <End Role="orderDetals" EntitySet="orderDetals" />
-          </AssociationSet>
           <AssociationSet Name="FK__orders__customer__239E4DCF" Association="goldstoreModel.FK__orders__customer__239E4DCF">
             <End Role="user" EntitySet="user" />
             <End Role="orders" EntitySet="orders" />
@@ -471,7 +462,16 @@
             <End Role="Payment" EntitySet="Payment" />
             <End Role="orders" EntitySet="orders" />
           </AssociationSet>
-        </EntityContainer>
+          <EntitySet Name="orderDetals" EntityType="goldstoreModel.orderDetals" />
+          <AssociationSet Name="fkOrders" Association="goldstoreModel.fkOrders">
+            <End Role="orders" EntitySet="orders" />
+            <End Role="orderDetals" EntitySet="orderDetals" />
+          </AssociationSet>
+          <AssociationSet Name="fkProduct" Association="goldstoreModel.fkProduct">
+            <End Role="product" EntitySet="product" />
+            <End Role="orderDetals" EntitySet="orderDetals" />
+          </AssociationSet>
+          </EntityContainer>
         <EntityType Name="user">
           <Key>
             <PropertyRef Name="userId" />
@@ -513,17 +513,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityType Name="orderDetals">
-          <Key>
-            <PropertyRef Name="orderId" />
-            <PropertyRef Name="productId" />
-          </Key>
-          <Property Name="orderId" Type="Int32" Nullable="false" />
-          <Property Name="productId" Type="Int32" Nullable="false" />
-          <Property Name="quantityId" Type="Int32" />
-          <NavigationProperty Name="orders" Relationship="goldstoreModel.fkOrders" FromRole="orderDetals" ToRole="orders" />
-          <NavigationProperty Name="product" Relationship="goldstoreModel.fkProduct" FromRole="orderDetals" ToRole="product" />
-        </EntityType>
         <EntityType Name="orders">
           <Key>
             <PropertyRef Name="orderId" />
@@ -531,7 +520,6 @@
           <Property Name="orderId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="customerId" Type="Int32" />
           <Property Name="orderDate" Type="DateTime" Precision="3" />
-          <NavigationProperty Name="orderDetals" Relationship="goldstoreModel.fkOrders" FromRole="orders" ToRole="orderDetals" />
           <NavigationProperty Name="user" Relationship="goldstoreModel.FK__orders__customer__239E4DCF" FromRole="orders" ToRole="user" />
           <Property Name="shipType" Type="Boolean" />
           <Property Name="firstname" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
@@ -543,6 +531,7 @@
           <Property Name="email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="paymentType" Type="Int32" />
           <NavigationProperty Name="Payment" Relationship="goldstoreModel.FK__orders__paymentT__38996AB5" FromRole="orders" ToRole="Payment" />
+          <NavigationProperty Name="orderDetals" Relationship="goldstoreModel.fkOrders" FromRole="orders" ToRole="orderDetals" />
         </EntityType>
         <EntityType Name="wishlist">
           <Key>
@@ -555,30 +544,6 @@
           <NavigationProperty Name="product" Relationship="goldstoreModel.FK__wishlist__produc__2A4B4B5E" FromRole="wishlist" ToRole="product" />
           <NavigationProperty Name="user" Relationship="goldstoreModel.FK__wishlist__userIs__2B3F6F97" FromRole="wishlist" ToRole="user" />
         </EntityType>
-        <Association Name="fkOrders">
-          <End Type="goldstoreModel.orders" Role="orders" Multiplicity="1" />
-          <End Type="goldstoreModel.orderDetals" Role="orderDetals" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="orders">
-              <PropertyRef Name="orderId" />
-            </Principal>
-            <Dependent Role="orderDetals">
-              <PropertyRef Name="orderId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="fkProduct">
-          <End Type="goldstoreModel.product" Role="product" Multiplicity="1" />
-          <End Type="goldstoreModel.orderDetals" Role="orderDetals" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="product">
-              <PropertyRef Name="productId" />
-            </Principal>
-            <Dependent Role="orderDetals">
-              <PropertyRef Name="productId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK__orders__customer__239E4DCF">
           <End Type="goldstoreModel.user" Role="user" Multiplicity="0..1" />
           <End Type="goldstoreModel.orders" Role="orders" Multiplicity="*" />
@@ -665,7 +630,42 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-      </Schema>
+        <EntityType Name="orderDetals">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="orderId" Type="Int32" Nullable="false" />
+          <Property Name="productId" Type="Int32" Nullable="false" />
+          <Property Name="quantity" Type="Int32" />
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="orders" Relationship="goldstoreModel.fkOrders" FromRole="orderDetals" ToRole="orders" />
+          <NavigationProperty Name="product" Relationship="goldstoreModel.fkProduct" FromRole="orderDetals" ToRole="product" />
+        </EntityType>
+        <Association Name="fkOrders">
+          <End Type="goldstoreModel.orders" Role="orders" Multiplicity="1" />
+          <End Type="goldstoreModel.orderDetals" Role="orderDetals" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="orders">
+              <PropertyRef Name="orderId" />
+            </Principal>
+            <Dependent Role="orderDetals">
+              <PropertyRef Name="orderId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fkProduct">
+          <End Type="goldstoreModel.product" Role="product" Multiplicity="1" />
+          <End Type="goldstoreModel.orderDetals" Role="orderDetals" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="product">
+              <PropertyRef Name="productId" />
+            </Principal>
+            <Dependent Role="orderDetals">
+              <PropertyRef Name="productId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
@@ -746,15 +746,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="orderDetals">
-            <EntityTypeMapping TypeName="goldstoreModel.orderDetals">
-              <MappingFragment StoreEntitySet="orderDetals">
-                <ScalarProperty Name="quantityId" ColumnName="quantityId" />
-                <ScalarProperty Name="productId" ColumnName="productId" />
-                <ScalarProperty Name="orderId" ColumnName="orderId" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="orders">
             <EntityTypeMapping TypeName="goldstoreModel.orders">
               <MappingFragment StoreEntitySet="orders">
@@ -802,6 +793,16 @@
               <MappingFragment StoreEntitySet="Payment">
                 <ScalarProperty Name="PaymentName" ColumnName="PaymentName" />
                 <ScalarProperty Name="paymentId" ColumnName="paymentId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="orderDetals">
+            <EntityTypeMapping TypeName="goldstoreModel.orderDetals">
+              <MappingFragment StoreEntitySet="orderDetals">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="quantity" ColumnName="quantity" />
+                <ScalarProperty Name="productId" ColumnName="productId" />
+                <ScalarProperty Name="orderId" ColumnName="orderId" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

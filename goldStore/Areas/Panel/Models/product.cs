@@ -18,8 +18,8 @@ namespace goldStore.Areas.Panel.Models
         public product()
         {
             this.productImage = new HashSet<productImage>();
-            this.orderDetals = new HashSet<orderDetals>();
             this.wishlist = new HashSet<wishlist>();
+            this.orderDetals = new HashSet<orderDetals>();
         }
     
         public int productId { get; set; }
@@ -36,8 +36,8 @@ namespace goldStore.Areas.Panel.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<productImage> productImage { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<orderDetals> orderDetals { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<wishlist> wishlist { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<orderDetals> orderDetals { get; set; }
     }
 }

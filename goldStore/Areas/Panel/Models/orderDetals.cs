@@ -16,7 +16,8 @@ namespace goldStore.Areas.Panel.Models
     {
         public int orderId { get; set; }
         public int productId { get; set; }
-        public Nullable<int> quantityId { get; set; }
+        public Nullable<int> quantity { get; set; }
+        public int Id { get; set; }
     
         public virtual orders orders { get; set; }
         public virtual product product { get; set; }

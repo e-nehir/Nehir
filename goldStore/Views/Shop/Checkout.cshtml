@@ -58,14 +58,14 @@
 
                                                         {
 
-                                                        <input type="text" placeholder="First name">
+                                                       
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="single-input">
                                                         @Html.EditorFor(model => model.lastName, new { htmlAttributes = new { placeholder = "soyad" } })
 
-                                                        <input type="text" placeholder="Last name">
+                                                      
                                                     </div>
                                                 </div>
                                                 <div class="col-md-12">
@@ -75,7 +75,7 @@
                                                     <div class="single-input">
                                                         @Html.EditorFor(model => model.address, new { htmlAttributes = new { placeholder = "adres" } })
 
-                                                        <input type="text" placeholder="Street Address">
+                                                      
                                                     </div>
                                                 </div>
                                                 <div class="col-md-12">
@@ -85,28 +85,28 @@
                                                     <div class="single-input">
                                                         @Html.EditorFor(model => model.city, new { htmlAttributes = new { placeholder = "sehir" } })
 
-                                                        <input type="text" placeholder="City/State">
+                                                       
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="single-input">
                                                         @Html.EditorFor(model => model.postCode, new { htmlAttributes = new { placeholder = "postkod" } })
 
-                                                        <input type="text" placeholder="Post code/ zip">
+                                                       
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="single-input">
                                                         @Html.EditorFor(model => model.email, new { htmlAttributes = new { placeholder = "email" } })
 
-                                                        <input type="email" placeholder="Email address">
+                                                       
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="single-input">
                                                         @Html.EditorFor(model => model.phone, new { htmlAttributes = new { placeholder = "telno" } })
 
-                                                        <input type="text" placeholder="Phone number">
+                                                      
                                                     </div>
                                                 </div>
                                             </div>
@@ -120,6 +120,7 @@
                                     <div class="shipinfo">
                                         <h3 class="shipinfo__title">Gönderim Adresi</h3>
                                         <p><b>Address:</b>@Model.address,@Model.city</p>
+<input type="checkbox" id="shipbox" name="=shipbox" class="ship-to-another-trigger"/>
                                         <a href="#" class="ship-to-another-trigger"><i class="zmdi zmdi-long-arrow-right"></i>Farklı Adrese gider</a>
                                         <div class="ship-to-another-content">
                                             <form action="#">
@@ -293,18 +294,7 @@
                                             <a href="@Url.Action("Remove", "Shop", new { productId = item.product.productId })"><i class="zmdi zmdi-delete"></i></a>
                                         </div>
                                     </div>
-                                    <div class="single-item">
-                                        <div class="single-item__thumb">
-                                            <img src="images/cart/2.png" alt="ordered item">
-                                        </div>
-                                        <div class="single-item__content">
-                                            <a href="#">Santa fe jacket for men</a>
-                                            <span class="price">$128</span>
-                                        </div>
-                                        <div class="single-item__remove">
-                                            <a href="#"><i class="zmdi zmdi-delete"></i></a>
-                                        </div>
-                                    </div>
+                                    
                                 </div>
                             }
 
@@ -377,9 +367,25 @@
 <script type="text/javascript">
     $(function () {
         //delete basketItem
+
+        $(".ship-to-another-trigger").click(function () {
+            if ($(this).prop("checked") == true) {
+                $(".ship-to-another-content").slideDown(1000);
+                $("#shipbox").val("true");
+
+            }
+            else {
+                $(".ship-to-another-content").slideDown(1000);
+                $("#shipbox").val("false");
+
+
+            }
+
+        })
+
         $("#purchase").click(function () {
 
-            $("checkoutForm").submit();
+            $("#checkoutForm").submit();
 
             });
 

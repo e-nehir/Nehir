@@ -7,7 +7,7 @@ using System.Web;
 
 namespace goldStore.Areas.Panel.Models.Repository
 {
-    public class OrderDetailRepository : IRepository<orders>
+    public class OrderDetailRepository : IRepository<orderDetals>
     {
 
         private goldstoreEntities _context;
@@ -18,7 +18,7 @@ namespace goldStore.Areas.Panel.Models.Repository
             this._context = Context;
         }
 
-        public void Delete(orders model)
+        public void Delete(orderDetals model)
         {
 
             if (model != null)
@@ -29,17 +29,17 @@ namespace goldStore.Areas.Panel.Models.Repository
             }
         }
 
-        public orders Get(int id)
+        public orderDetals Get(int id)
         {
             return _context.orderDetals.Find(id);
         }
 
-        public List<orders> GetAll()
+        public List<orderDetals> GetAll()
         {
             return _context.orderDetals.AsNoTracking().ToList();
         }
 
-        public void Save(orders model)
+        public void Save(orderDetals model)
         {
             if (model != null)
             {
@@ -49,8 +49,11 @@ namespace goldStore.Areas.Panel.Models.Repository
             }
         }
 
-        public void Update(orders model)
+       
+
+        public void Update(orderDetals model)
         {
+            throw new NotImplementedException();
         }
     }
 }
