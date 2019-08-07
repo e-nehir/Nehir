@@ -20,12 +20,13 @@ namespace goldStore.Controllers
 {
     public class ShopController : Controller
     {
-        ProductRepository repoProduct = new ProductRepository(new Areas.Panel.Models.goldstoreEntities());
-        CategoryRepository repoCategory = new CategoryRepository(new Areas.Panel.Models.goldstoreEntities());
-        BrandRepository repoBrand = new BrandRepository(new Areas.Panel.Models.goldstoreEntities());
-        UserRepository repoUser = new UserRepository(new Areas.Panel.Models.goldstoreEntities());
-        OrderRepository repoOrder = new OrderRepository(new Areas.Panel.Models.goldstoreEntities());
-        OrderDetailRepository repoOrderDetail = new OrderDetailRepository(new Areas.Panel.Models.goldstoreEntities());
+        ProductRepository repoProduct = new ProductRepository(new goldstoreEntities());
+        CategoryRepository repoCategory = new CategoryRepository(new goldstoreEntities());
+        BrandRepository repoBrand = new BrandRepository(new goldstoreEntities());
+        UserRepository repoUser = new UserRepository(new goldstoreEntities());
+        OrderRepository repoOrder = new OrderRepository(new goldstoreEntities());
+        OrderDetailRepository repoOrderDetail = new OrderDetailRepository(new goldstoreEntities());
+
         // GET: Shop
         public ActionResult Index()
         {
@@ -230,7 +231,6 @@ namespace goldStore.Controllers
                 card.RemoveAt(index);
                 Session["card"] = card;
             }
-          
 
         }
 
@@ -239,59 +239,246 @@ namespace goldStore.Controllers
             return View((List<BasketItem>)Session["card"]);
         }
 
-        //[Authorize(Roles = "User")]
-        //public ActionResult CheckOut()
-        //{
-        //    if (!User.Identity.IsAuthenticated)
-        //    {
-        //        return RedirectToAction("Login", "User");
-        //    }
-        //    user availableUser = repoUser.GetAll().Where(x => x.email == User.Identity.Name).FirstOrDefault();
+        [Authorize(Roles = "User")]
+        public ActionResult Checkout()
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Login", "User");
+            }
+            user _user = repoUser.GetAll().Where(x => x.email == User.Identity.Name).FirstOrDefault();
 
-        //    return View(model);
+            return View(_user);
 
-        //}
-        //public ActionResult completeCheckOut()
-        //{
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "User")]
+        public ActionResult Checkout(user _user, bool? shipbox, int? shipmethod, int? paymentmethod, string ad, string soyad, string adres, string sehir, int? postakodu, string eposta, string telefon)
+        {
+            //shipbox-> shipbox true ise başkası adına yada basşa bir farklı adrese gönderim
+            //shipprice-> Hızlıgönderim:10 tl yada normal gönderim 5 tl
+            //paymenttype_>ödeme tipi 1-havale,2-kredi kartı,3- kapıda ödeme vb.
+            string message = "";
+            bool status = false;
+            if (!User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Login", "User");
+            }
+            user loginUser = repoUser.GetAll().Where(x => x.email == User.Identity.Name).FirstOrDefault();
+            orders newOrder = new orders();
+            newOrder.customerId = loginUser.userId;
+            // eğer kendine gönderiyorsa
+            if (shipbox == null)
+            {
+                if (_user != null)
+                {
+                    if (paymentmethod == null)
+                    {
+                        message = "Bir ödeme tipi seçmeniz gerekir";
+                        ViewBag.message = message;
+                        return View();
+                    }
+                       
+                    else
 
-        //    string message = "";
-        //    if (!User.Identity.IsAuthenticated)
-        //    {
-        //        return RedirectToAction("Login", "User");
-        //    }
-        //    user availableUser = db.user.Where(x => x.Email == User.Identity.Name).FirstOrDefault();
-        //    orders newOrder = new orders()
-        //    {
-        //        orderDate = DateTime.Now,
-        //        customerId = availableUser.userId
+                     
+                        newOrder.paymentType = paymentmethod;
+                    if (shipmethod == null)
+                        { 
+                        message = "Bir gönderme tipi(Hızlı ya da Normal gönderim) seçmeniz gerekir";
+                        ViewBag.message = message;
+                        return View();
+                    }
+                    else
+                    {
+                        if(shipmethod==1)
+                        {
+                         newOrder.ShipPrice = 10;
+                        }
+                       
+                        else
+                        {
+                        newOrder.ShipPrice = 5;
+                        }
+                            
 
-        //    };
-        //    db.orders.Add(newOrder);
-        //    db.SaveChanges();
+                    }
+                        
 
-        //    if (Session["card"] != null)
-        //    {
-        //        List<BasketItem> Basket = (List<BasketItem>)Session["card"];
-        //        orderDetails newOrderDetail = new orderDetails();
-        //        foreach (var item in Basket)
-        //        {
-        //            newOrderDetail.orderId = newOrder.orderId;
-        //            newOrderDetail.productId = item.product.productId;
-        //            newOrderDetail.quantity = item.quantity;
+                    // faklı birine yada farklı bir adrese göndermiyorsa
+                    newOrder.isOther = false;
 
-        //            db.orderDetails.Add(newOrderDetail);
-        //            db.SaveChanges();
-        //        }
-        //        // mail Gönderecek
-        //        SendOrderInfo(availableUser.email);
-        //        message = " Sipariş işlemi tamamlandı. siparişiniz ile ilgili bilgi mailinize gönderilmiştir. <br/>" +
-        //          "Ecommerce sayfanızda sipariş detaylarını görebilirisiniz. Detay için aşağıdaki linke tıklayınız" +
-        //              "<a href='/Account/MyOrders'></a> ";
+                    if (string.IsNullOrEmpty(_user.firstName))
+                    {
+                        message = "isim alanını doldurmanız gerekir";
+                        ViewBag.message = message;
+                        return View();
+                    }
+                    else
+                        newOrder.firstname = _user.firstName;
+                    if (string.IsNullOrEmpty(_user.lastName))
+                    {
+                        message = "Soyad alanını doldurmanız gerekir";
+                        ViewBag.message = message;
+                        return View();
+                    }
+                    else
+                        newOrder.lastname = _user.lastName;
+                    if (string.IsNullOrEmpty(_user.address))
+                    {
+                        message = "adres alanını doldurmanız gerekir";
+                        ViewBag.message = message;
+                        return View();
+                    }
+                    else
+                        newOrder.adress = _user.address;
+                    if (string.IsNullOrEmpty(_user.city))
+                    {
+                        message = "Şehir alanını doldurmanız gerekir";
+                        ViewBag.message = message;
+                        return View();
+                    }
+                    else
+                        newOrder.city = _user.city;
+                    if (string.IsNullOrEmpty(_user.phone))
+                    {
+                        message = "telefon alanını doldurmanız gerekir";
+                        ViewBag.message = message;
+                        return View();
+                    }
+                    else
+                        newOrder.phone = _user.phone;
 
-        //    }
-        //    return Content(message);
+                    newOrder.postCode = _user.postCode;
+                    // sipariş kaydet
+                    repoOrder.Save(newOrder);
+                    // sepette ürünler varsa
+                  
+                }
+            }
+            // farklı birine yada farklı bir adrese gönderiyorsa
+            else
+            {
 
-        //}
+                Session["ad"] = ad;
+                Session["soyad"] = soyad;
+                Session["adres"] = adres;
+                Session["sehir"] = sehir;
+
+                Session["telefon"] = telefon;
+                Session["postakodu"] = postakodu ?? 0;
+                Session["isGuest"] = true;
+                if (paymentmethod == null)
+                    message = "Bir ödeme tipi seçmeniz gerekir";
+                else
+                    newOrder.paymentType = paymentmethod;
+                if (shipmethod == null)
+                    message = "Bir gönderme tipi(Hızlı ya da Normal gönderim) seçmeniz gerekir";
+                else
+                    newOrder.ShipPrice = shipmethod;
+
+                // faklı birine yada farklı bir adrese gönderiyorsa
+                newOrder.isOther = true;
+
+                if (string.IsNullOrEmpty(ad))
+                {
+                    message = "isim alanı boş bıraktınız";
+                    ViewBag.message = message;
+                    return View();
+                }
+                else
+                    newOrder.firstname = ad;
+                if (string.IsNullOrEmpty(soyad))
+                {
+                    message = "Soyisim alanı boş bıraktınız";
+                    ViewBag.message = message;
+                    return View();
+                }
+                else
+                    newOrder.lastname = soyad;
+
+                if (string.IsNullOrEmpty(adres))
+                {
+                    message = "Adres alanı boş bıraktınız";
+                    ViewBag.message = message;
+                    return View();
+                }
+
+                else
+                    newOrder.adress = adres;
+                if (string.IsNullOrEmpty(sehir))
+                {
+                    message = "Şehir alanı boş bıraktınız";
+                    ViewBag.message = message;
+                    return View();
+                }
+                else
+                    newOrder.city = sehir;
+                if (postakodu != null)
+                    newOrder.postCode = postakodu;
+                if (!string.IsNullOrEmpty(eposta))
+                    newOrder.email = eposta;
+
+                if (string.IsNullOrEmpty(telefon))
+                {
+                    message = "Telefon alanı boş bıraktınız";
+                    ViewBag.message = message;
+                    return View();
+                }
+
+                else
+                    newOrder.phone = telefon;
+            }
+            if (Session["card"] != null)
+            {
+                List<BasketItem> Basket = (List<BasketItem>)Session["card"];
+                orderDetals newOrderDetail = new orderDetals();
+                foreach (var item in Basket)
+                {
+                    newOrderDetail.orderId = newOrder.orderId;
+                    newOrderDetail.productId = item.product.productId;
+                    newOrderDetail.quantity = item.quantity;
+                    repoOrderDetail.Save(newOrderDetail);
+
+                }
+                SendOrderInfo(loginUser.email);
+                message = " Sipariş işlemi tamamlandı. siparişiniz ile ilgili bilgi mailinize gönderilmiştir. <br/>" +
+                          "Goldstore sayfanızda sipariş detaylarını görebilirisiniz. Detay için aşağıdaki linke tıklayınız";
+                status = true;
+
+            }
+            ViewBag.message = message;
+            ViewBag.status = status;
+            return View();
+        }
+
+        //gonderim tutarı hesaplama
+        public string appylShipPrice(int?shipmethod)
+        {
+            string message = "";
+            if(shipmethod !=null)
+            {
+                switch (shipmethod)
+                {
+                    case 1:
+                        {
+                            Session["shipPrice"] = 10m;
+                            message = "Hızlı Gönderim uygulandı";
+                            break;
+                        }
+                    case 2:
+                        {
+                            Session["shipPrice"] = 5m;
+                            message = "Normal Gönderim uygulandı";
+                            break;
+                        }
+                    
+                }
+            }
+            return message;
+        }
+
         [NonAction]
         public void SendOrderInfo(string emailID)
         {
@@ -327,173 +514,9 @@ namespace goldStore.Controllers
             {
                 throw new Exception(ex.Message);
             }
-
         }
-        public ActionResult Checkout(user user, bool? shipbox)
-        {
-            string message = "";
-            bool status;
-            if (!User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Login", "User");
-
-            }
-            user loginUser = repoUser.GetAll().Where(x => x.email == User.Identity.Name).FirstOrDefault();
-            orders newOrder = new orders();
-            newOrder.customerId = loginUser.userId;
-            if (shipbox != false)
-            {
-
-                if (user != null)
-                {
-                    newOrder.shipType = false;
-
-
-                    if (string.IsNullOrEmpty(user.firstName))
-                    {
-                        message = "isim alanını doldurunuz";
-                        ViewBag.message = message;
-                        return View();
-                    }
-                    else
-                        newOrder.firstname = user.firstName;
-                    if (string.IsNullOrEmpty(user.lastName))
-                    {
-                        message = "Soy isim alanını doldurunuz";
-                        ViewBag.message = message;
-                        return View();
-                    }
-                    else
-                        newOrder.lastname = user.lastName;
-                    if (string.IsNullOrEmpty(user.address))
-                    {
-                        message = "adres alanını doldurunuz";
-                        ViewBag.message = message;
-                        return View();
-                    }
-                    else
-                        newOrder.adress = user.address;
-
-                    if (string.IsNullOrEmpty(user.city))
-                    {
-                        message = "sehir alanını doldurunuz";
-                        ViewBag.message = message;
-                        return View();
-                    }
-                    else
-                        newOrder.city = user.city;
-                    if (string.IsNullOrEmpty(user.phone))
-                    {
-                        message = "telefon alanını doldurunuz";
-                        ViewBag.message = message;
-                        return View();
-                    }
-                    else
-                        newOrder.phone = user.phone;
-                    newOrder.postCode = user.postCode;
-                    repoOrder.Save(newOrder);
-
-                    if(Session ["card"] !=null)
-                    {
-                        List<BasketItem> Basket = (List<BasketItem>)Session["card"];
-                        orderDetals neworderDetals = new orderDetals();
-
-                        foreach (var item in Basket)
-                        {
-                            neworderDetals.orderId = newOrder.orderId;
-                            neworderDetals.productId = item.product.productId;
-                            neworderDetals.quantity = item.quantity;
-                            repoOrderDetail.Save(neworderDetals);
-                        }
-
-                        SendOrderInfo(loginUser.email);
-                        message = "sipariş işlemi tamamlandı. siparişiniz ile ilgili bilgi mailinize gönderilmiştir<br/>" + "Goldstore sayfanızda sipariş detaylşarını görebilirsiniz.Detay için tıklayın";
-                        status = true;
-                          
-
-                    }
-
-                }
-
-                
-
-            }
-            return View();
-        }
-
-
-        [Authorize(Roles ="User")]
-        public ActionResult completeCheckout( user user)
-        {
-            string message = "";
-            bool status;
-            if (!User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Login", "User");
-
-            }
-            user loginUser = repoUser.GetAll().Where(x => x.email == User.Identity.Name).FirstOrDefault();
-            orders newOrder = new orders();
-            newOrder.customerId = loginUser.userId;
-            
-
-                if (user !=null)
-            {
-
-                if (string.IsNullOrEmpty(user.firstName))
-                {
-                    message = "isim alanını doldurunuz";
-                    ViewBag.message = message;
-                    return View();
-                }
-                else
-                    newOrder.firstname = user.firstName;
-                if (string.IsNullOrEmpty(user.lastName))
-                {
-                    message = "Soy isim alanını doldurunuz";
-                    ViewBag.message = message;
-                    return View();
-                }
-                else
-                    newOrder.lastname = user.lastName;
-                if (string.IsNullOrEmpty(user.address))
-                {
-                    message = "adres alanını doldurunuz";
-                    ViewBag.message = message;
-                    return View();
-                }
-                else
-                    newOrder.adress = user.address;
-
-                if (string.IsNullOrEmpty(user.city))
-                {
-                    message = "sehir alanını doldurunuz";
-                    ViewBag.message = message;
-                    return View();
-                }
-                else
-                    newOrder.city = user.city;
-                if (string.IsNullOrEmpty(user.phone))
-                {
-                    message = "telefon alanını doldurunuz";
-                    ViewBag.message = message;
-                    return View();
-                }
-                else
-                    newOrder.phone = user.phone;
-
-
-
-
-
-            }
-
-            return View();
-           
-        }
-    }
 
     }
-
+}
 
 

@@ -19,7 +19,7 @@ namespace goldStore.Areas.Panel.Models
         public Nullable<int> quantity { get; set; }
         public int Id { get; set; }
     
-        public virtual orders orders { get; set; }
         public virtual product product { get; set; }
+        public virtual orders orders { get; set; }
     }
 }

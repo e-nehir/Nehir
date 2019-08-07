@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<goldStore.Models.ViewModel.BasketItem>
+    @using goldStore.Areas.Panel.Models
 @{
     Layout = null;
 }
@@ -104,13 +105,29 @@
                                 <div class="cart__desk__list">
                                     <ul class="cart__desc">
                                         <li>Toplam Tutar</li>
-                                        <li>Vergi</li>
+                                        <li>İndirim</li>
                                         <li>Teslimat</li>
                                     </ul>
                                     <ul class="cart__price">
                                         <li>₺@Model.Sum(x => x.product.price * x.quantity)</li>
-                                        <li>₺ @(Model.Sum(x => x.product.price * x.quantity) * 0.18m)</li>
-                                        <li>0</li>
+                                        <li>
+                                            @{ 
+
+                                                decimal indirim_tutari = 0;
+                                                if(Session["discount"] != null)
+                                                {
+
+                                                    coupons _indirim = (coupons)Session["discount"];
+                                                    indirim_tutari = (decimal)_indirim.discount;
+                                                }
+
+                                            }
+                                        
+                                        ₺@indirim_tutari
+                                        
+                                        
+                                        </li>
+                                        <li></li>
                                     </ul>
                                 </div>
                                 <div class="cart__total">
@@ -182,6 +199,28 @@ $(function () {
                 )
 
 
+    });
+    $("#applyDiscount").on("click", function () {
+
+        var _discountCode = $("#discountCode").val();
+        alert(discountCode);
+
+
+        if (discountCode != undefined) {
+
+            $.ajax({
+
+                url: '@Url.Action("applyDiscount","Account")',
+                type: 'POST',
+                data: { discountCode: _discountCode },
+                success: function (response) {
+
+                    location.reload();
+                }
+
+            });
+        }
         });
 });
+
 </script>
