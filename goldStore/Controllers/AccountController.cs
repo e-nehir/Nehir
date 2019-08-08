@@ -64,5 +64,35 @@ namespace goldStore.Controllers
             ViewBag.status = status;
             return View();
         }
+
+
+        [HttpPost]
+        public void applyDiscount(string discountCode)
+        {
+           
+
+            var acountOwner = User.Identity.Name;
+            int customerId = repoUser.GetAll().Where(x => x.email == acountOwner).FirstOrDefault().userId;
+            var _discount = repoUser.Get(customerId).coupons.FirstOrDefault(i => i.isActive == true && i.couponCode == discountCode && DateTime.Now < i.expire).discount;
+            if( _discount !=null)
+            {
+                coupons _indirim = new coupons()
+                {
+                    discount = _discount,
+                    couponCode = discountCode
+
+                };
+                Session["discount"] = _indirim;
+
+
+            }
+        }
+        public ActionResult Coupons()
+        {
+            return View(repoCoupon.GetAll());
+
+        }
+
+
     }
 }

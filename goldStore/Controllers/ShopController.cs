@@ -26,6 +26,8 @@ namespace goldStore.Controllers
         UserRepository repoUser = new UserRepository(new goldstoreEntities());
         OrderRepository repoOrder = new OrderRepository(new goldstoreEntities());
         OrderDetailRepository repoOrderDetail = new OrderDetailRepository(new goldstoreEntities());
+        CouponRepostroy repoCoupon = new CouponRepostroy(new goldstoreEntities());
+
 
         // GET: Shop
         public ActionResult Index()
@@ -261,6 +263,7 @@ namespace goldStore.Controllers
             //paymenttype_>ödeme tipi 1-havale,2-kredi kartı,3- kapıda ödeme vb.
             string message = "";
             bool status = false;
+            bool orderComlate = false;
             if (!User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Login", "User");
@@ -442,17 +445,69 @@ namespace goldStore.Controllers
                     repoOrderDetail.Save(newOrderDetail);
 
                 }
+
+                decimal total = (decimal)Basket.Sum(x => x.quantity * x.product.price);
+                if (Session["discount"] != null)
+                {
+
+                    coupons _discount = (coupons)Session["discount"];
+                    total -= (decimal)_discount.discount;
+
+                    coupons usedCoupon = repoCoupon.GetAll().FirstOrDefault(x => x.couponCode == _discount.couponCode);
+                    usedCoupon.isUser = true;
+                    usedCoupon.isActive = false;
+                    repoCoupon.Update(usedCoupon);
+                }
+                if (total >= 2500)
+                {
+                    string couponCode = createCouponCode();
+                    string subject = "İndirim kuponu kazandınız";
+                    string body = "tebrikler %5 indirim kuponu akzandınız" + "İkinci alışverişte indirim son gün" + DateTime.Now.AddDays(10);
+
+               
+                coupons newCoupon = new coupons()
+                {
+
+                    userId = loginUser.userId,
+                    isActive = true,
+                    created = DateTime.Now,
+                    expire = DateTime.Now.AddDays(10),
+                    couponCode = couponCode,
+                    Title = "%5 Hediye kuponu",
+                    discount = Basket.Sum(x => x.quantity * x.product.price) * 0.05m,
+                    isUser = false
+
+                };
+
+                repoCoupon.Save(newCoupon);
+ 
+                SendCouponMail(User.Identity.Name, couponCode, subject, body);
+         }  
+                //sipariş güncelle
+            newOrder.OrderPrice = total;
+            repoOrder.Update(newOrder);
+          
                 SendOrderInfo(loginUser.email);
                 message = " Sipariş işlemi tamamlandı. siparişiniz ile ilgili bilgi mailinize gönderilmiştir. <br/>" +
                           "Goldstore sayfanızda sipariş detaylarını görebilirisiniz. Detay için aşağıdaki linke tıklayınız";
                 status = true;
+                orderComlate = true;
+                if(orderComlate)
+                {
+                    Session.Remove("card");
+                    Session.Remove("discount");
+                    Session.Remove("shipPrice");
+
+                }
 
             }
             ViewBag.message = message;
             ViewBag.status = status;
             return View();
-        }
 
+           
+        }
+ 
         //gonderim tutarı hesaplama
         public string appylShipPrice(int?shipmethod)
         {
@@ -477,6 +532,78 @@ namespace goldStore.Controllers
                 }
             }
             return message;
+        }
+
+        public string createCouponCode()
+        {
+            Random rn = new Random();
+            string result = "";
+            char[] expression = new char[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'Ş', 'İ', 'Z', 'N', 'M', 'Ö', 'O', 'S', 'Ş', 'R', 'T', 'Y', 'U', 'Y', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+            for(int i=0; i<8; i++)
+            {
+                result += expression[rn.Next(expression.Length)].ToString();
+
+            }
+            return result;
+        }
+
+        [NonAction]
+        public void SendCouponMail(string _email, string _couponCode, string _subject, string _message)
+        {
+            SmtpSection network = (SmtpSection)ConfigurationManager.GetSection("system.net/mailSettings/smtp");
+            try
+            {
+                var url = "/Account/MyOrders";
+                var link = Request.Url.AbsoluteUri.Replace(Request.Url.PathAndQuery, url);
+                var fromEmail = new MailAddress(network.Network.UserName, "Goldstore Sipariş Bilgisi");
+                var toEmail = new MailAddress(_email);
+
+                string subject = _subject;
+                string body = "<br/><br/>" + _message + " <br/><br/><a href='" + link + "'>" + link + "</a> ";
+                var smtp = new SmtpClient
+                {
+                    Host = network.Network.Host,
+                    Port = network.Network.Port,
+                    EnableSsl = network.Network.EnableSsl,
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    UseDefaultCredentials = network.Network.DefaultCredentials,
+                    Credentials = new NetworkCredential(network.Network.UserName, network.Network.Password)
+                };
+                using (var message = new MailMessage(fromEmail, toEmail)
+                {
+                    Subject = subject,
+                    Body = body,
+                    IsBodyHtml = true
+                })
+                    smtp.Send(message);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+
+        [HttpPost]
+        public void applyDiscount(string discountCode)
+        {
+
+
+            var acountOwner = User.Identity.Name;
+            int customerId = repoUser.GetAll().Where(x => x.email == acountOwner).FirstOrDefault().userId;
+            var _discount = repoUser.Get(customerId).coupons.FirstOrDefault(i => i.isActive == true && i.couponCode == discountCode && DateTime.Now < i.expire).discount;
+            if (_discount != null)
+            {
+                coupons _indirim = new coupons()
+                {
+                    discount = _discount,
+                    couponCode = discountCode
+
+                };
+                Session["discount"] = _indirim;
+
+
+            }
         }
 
         [NonAction]

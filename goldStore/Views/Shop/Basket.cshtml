@@ -90,11 +90,11 @@
                     <div class="row">
                         <div class="col-md-6 col-sm-12 col-xs-12">
                             <div class="ht__coupon__code">
-                                <span>enter your discount code</span>
+                                <span>İndirim Kopunu</span>
                                 <div class="coupon__box">
-                                    <input type="text" placeholder="">
+                                    <input id="discountCode" type="text" placeholder="İndirim Kupon Kodu Giriniz">
                                     <div class="ht__cp__btn">
-                                        <a href="#">enter</a>
+                                        <a href="javascript:void(0);" id="applyDiscount">Giriş</a>
                                     </div>
                                 </div>
                             </div>
@@ -109,7 +109,7 @@
                                         <li>Teslimat</li>
                                     </ul>
                                     <ul class="cart__price">
-                                        <li>₺@Model.Sum(x => x.product.price * x.quantity)</li>
+                                        <li>₺@(Model.Sum(x => x.product.price * x.quantity) * 0.18m)</li>
                                         <li>
                                             @{ 
 
@@ -210,7 +210,7 @@ $(function () {
 
             $.ajax({
 
-                url: '@Url.Action("applyDiscount","Account")',
+                url: '@Url.Action("applyDiscount","Shop")',
                 type: 'POST',
                 data: { discountCode: _discountCode },
                 success: function (response) {

@@ -1297,6 +1297,7 @@
     </Compile>
     <Compile Include="Areas\Panel\Models\Repository\BrandRepository.cs" />
     <Compile Include="Areas\Panel\Models\Repository\CategoryRepository.cs" />
+    <Compile Include="Areas\Panel\Models\Repository\CouponRepostroy.cs" />
     <Compile Include="Areas\Panel\Models\Repository\OrderDetailRepository.cs" />
     <Compile Include="Areas\Panel\Models\Repository\OrderRepository.cs" />
     <Compile Include="Areas\Panel\Models\Repository\ProductRepository.cs" />
@@ -1313,6 +1314,7 @@
     </Compile>
     <Compile Include="Areas\Panel\PanelAreaRegistration.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\CouponRepostory.cs" />
     <Compile Include="Controllers\ShopController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Global.asax.cs">
@@ -1469,6 +1471,7 @@
     <Content Include="Views\_Shared\_LayoutAccount.cshtml" />
     <Content Include="Views\Shop\Basket.cshtml" />
     <Content Include="Views\Shop\Checkout.cshtml" />
+    <Content Include="Views\Account\Coupons.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
