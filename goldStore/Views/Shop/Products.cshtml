@@ -45,11 +45,11 @@
                                     </div>
                                     <div class="fr__hover__info">
                                         <ul class="product__action">
-                                            <li><a href="@Url.Action("WishList", "Account")"><i class="icon-heart icons"></i></a></li>
+                                            <li><a title="Favorilerime Ekle" href="javascript:void(0);" id="addwish" productId="@product.productId"><i class="icon-heart icons"></i></a></li>
+                                                                                      
+                                            <li><a title="Sepete Ekle" href="@Url.Action("AddCard","Shop",new {productId=product.productId,quantity=1 })" id="addBasket" productId="@product.productId"><i class="icon-handbag icons"></i></a></li>
 
-                                            <li><a href="@Url.Action("AddCard","Shop",new {productId=product.productId,quantity=1 })" id="addBasket" productId="@product.productId"><i class="icon-handbag icons"></i></a></li>
-
-                                            <li><a href="@Url.Action("Compare", "Shop"))"><i class="icon-shuffle icons"></i></a></li>
+                                            <li><a title="Karşılaştır" href="@Url.Action("Compare", "Shop"))"><i class="icon-shuffle icons"></i></a></li>
                                         </ul>
                                     </div>
                                     <div class="fr__product__inner">

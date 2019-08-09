@@ -8,91 +8,134 @@ using System.Web;
 using System.Web.Mvc;
 
 namespace goldStore.Controllers
-{
+{[Authorize(Roles = "user")]
     public class AccountController : Controller
     {
+              
+                
+            UserRepository repoUser = new UserRepository(new goldstoreEntities());
+            CouponRepostory repoCoupon = new CouponRepostory(new goldstoreEntities());
+            OrderRepository repoOrder = new OrderRepository(new goldstoreEntities());
+            whishRepository repoWishList = new whishRepository(new goldstoreEntities());
+            ProductRepository repoProduct = new ProductRepository(new goldstoreEntities());
+            // GET: Account
 
-        UserRepository repoUser = new UserRepository(new goldstoreEntities());
-        // GET: Account
-        [Authorize(Roles ="user")]
-        public ActionResult Index()
-        {
-            return RedirectToAction("MyProfile");
-        }
-        public  ActionResult MyProfile()
-        {
-            if (User.Identity.IsAuthenticated)
+            public ActionResult Index()
             {
-                user _user = repoUser.GetAll().Where(x => x.email == User.Identity.Name).FirstOrDefault();
-                return View(_user);
+                return View();
             }
-            return View();
-           
-        }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult MyProfile(user userForm)
-        {
-            string message = "";
-            bool status = false;
-            if (userForm!=null)
+            public ActionResult MyProfile()
             {
-                user _user = repoUser.GetAll().Where(x => x.email == User.Identity.Name).FirstOrDefault();
-                if (userForm.firstName != null)
-                    _user.firstName = userForm.firstName;
-                if (userForm.lastName != null)
-                    _user.lastName = userForm.lastName;
-                if(userForm.password!=null && userForm.rePassword != null)
+                if (User.Identity.IsAuthenticated)
                 {
-                    _user.password = Crypto.Hash(userForm.password);
-                    _user.rePassword = Crypto.Hash(userForm.rePassword);
-                }               
-                if (userForm.phone!=null)               
-                    _user.phone = userForm.phone;
-                if (userForm.address != null)
-                    _user.address = userForm.address;
-                if (userForm.city != null)
-                    _user.city = userForm.city;
-                if (userForm.subscribe == true)
-                    _user.subscribe = true;
+                    user _user = repoUser.GetAll().Where(x => x.email == User.Identity.Name).FirstOrDefault();
+                    return View(_user);
+                }
+                return View();
 
-                status = true;
-                message = "Değişiklikler kaydedildi";
-                repoUser.Update(_user);              
             }
-            ViewBag.message = message;
-            ViewBag.status = status;
-            return View();
-        }
-
-
-        [HttpPost]
-        public void applyDiscount(string discountCode)
-        {
-           
-
-            var acountOwner = User.Identity.Name;
-            int customerId = repoUser.GetAll().Where(x => x.email == acountOwner).FirstOrDefault().userId;
-            var _discount = repoUser.Get(customerId).coupons.FirstOrDefault(i => i.isActive == true && i.couponCode == discountCode && DateTime.Now < i.expire).discount;
-            if( _discount !=null)
+            [HttpPost]
+            [ValidateAntiForgeryToken]
+            public ActionResult MyProfile(user userForm)
             {
-                coupons _indirim = new coupons()
+                string message = "";
+                bool status = false;
+                if (userForm != null)
                 {
-                    discount = _discount,
-                    couponCode = discountCode
+                    user _user = repoUser.GetAll().Where(x => x.email == User.Identity.Name).FirstOrDefault();
+                    if (userForm.firstName != null)
+                        _user.firstName = userForm.firstName;
+                    if (userForm.lastName != null)
+                        _user.lastName = userForm.lastName;
+                    if (userForm.password != null && userForm.rePassword != null)
+                    {
+                        _user.password = Crypto.Hash(userForm.password);
+                        _user.rePassword = Crypto.Hash(userForm.rePassword);
+                    }
+                    if (userForm.phone != null)
+                        _user.phone = userForm.phone;
+                    if (userForm.address != null)
+                        _user.address = userForm.address;
+                    if (userForm.city != null)
+                        _user.city = userForm.city;
+                    if (userForm.subscribe == true)
+                        _user.subscribe = true;
 
-                };
-                Session["discount"] = _indirim;
+                    status = true;
+                    message = "Değişiklikler kaydedildi";
+                    repoUser.Update(_user);
+                }
+                ViewBag.message = message;
+                ViewBag.status = status;
+                return View();
+            }
 
+            [HttpPost]
+            public void applyDiscount(string discountCode)
+            {
+                var accountOwner = User.Identity.Name;
+                int customerId = repoUser.GetAll().Where(x => x.email == accountOwner).FirstOrDefault().userId;
+                var _discount = repoUser.Get(customerId).coupons.FirstOrDefault(i => i.isActive == true && i.couponCode == discountCode && DateTime.Now < i.expired).discount;
+                if (_discount != null)
+                {
+                    coupons _indirim = new coupons()
+                    {
+                        discount = _discount,
+                        couponCode = discountCode
+                    };
+                    Session["discount"] = _indirim;
+                }
+            }
+            public ActionResult Coupons()
+            {
+                var customerId = repoUser.GetAll().Where(u => u.email == User.Identity.Name).FirstOrDefault().userId;
+                return View(repoCoupon.GetAll().Where(x => x.userIs == customerId));
+            }
+            public ActionResult Myorders()
+            {
+                var customerId = repoUser.GetAll().Where(u => u.email == User.Identity.Name).FirstOrDefault().userId;
+                return View(repoOrder.GetAll().Where(x => x.customerId == customerId));
+            }
+            public ActionResult Wishlist()
+            {
+                var customerId = repoUser.GetAll().Where(u => u.email == User.Identity.Name).FirstOrDefault().userId;
+                return View(repoWishList.GetAll().Where(x => x.userIs == customerId));
+            }
+            [HttpPost]
+            public void DeleteWishItem(int id)
+            {
+                var favourite = repoWishList.Get(id);
+                repoWishList.Delete(favourite);
+            }
+            [HttpPost]
+            public string AddWish(int productId)
+            {
+                if (User.Identity.IsAuthenticated)
+                {
+                    var accountOwner = User.Identity.Name;
+                    //favori ekleme
+                    // emaili olan kullanıcının user id sini bulalım.
+                    int userId = repoUser.GetAll().Where(x => x.email == accountOwner).FirstOrDefault().userId;
+                    // favoriler tablosunda bu kullanıcıya ait gelen kitap varmı yokmu
+                    int count = repoWishList.GetAll().Where(x => x.userIs == userId && x.productId == productId).Count();
+                    if (count == 0)
+                    {
+                        var product = repoProduct.Get(productId);
+                        wishlist newFavori = new wishlist()
+                        {
+                            productId = productId,
+                            userIs = userId
+                        };
+                        repoWishList.Save(newFavori);
+                        return "Favorilerime Eklendi";
+                    }
+                    else
+                        return "Favorilerime Daha önceden eklemişsiniz";
+
+                }
+                else
+                    return "Login olmanız gerekir";
 
             }
         }
-        public ActionResult Coupons()
-        {
-            return View(repoCoupon.GetAll());
-
-        }
-
-
     }
-}

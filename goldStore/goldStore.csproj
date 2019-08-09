@@ -1302,6 +1302,8 @@
     <Compile Include="Areas\Panel\Models\Repository\OrderRepository.cs" />
     <Compile Include="Areas\Panel\Models\Repository\ProductRepository.cs" />
     <Compile Include="Areas\Panel\Models\Repository\UserRepository.cs" />
+    <Compile Include="Areas\Panel\Models\Repository\whishRepository.cs" />
+    <Compile Include="Areas\Panel\Models\Repository\Wishlist.cs" />
     <Compile Include="Areas\Panel\Models\role.cs">
       <DependentUpon>nehirx.tt</DependentUpon>
     </Compile>
@@ -1314,6 +1316,7 @@
     </Compile>
     <Compile Include="Areas\Panel\PanelAreaRegistration.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\CouponRepository.cs" />
     <Compile Include="Controllers\CouponRepostory.cs" />
     <Compile Include="Controllers\ShopController.cs" />
     <Compile Include="Controllers\UserController.cs" />
@@ -1472,6 +1475,8 @@
     <Content Include="Views\Shop\Basket.cshtml" />
     <Content Include="Views\Shop\Checkout.cshtml" />
     <Content Include="Views\Account\Coupons.cshtml" />
+    <Content Include="Views\Account\whishlist.cshtml" />
+    <Content Include="Views\Account\Myorders.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

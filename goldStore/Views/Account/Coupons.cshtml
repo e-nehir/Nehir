@@ -31,7 +31,7 @@
                                 <td>@m.Title</td>
                                 <td>@m.couponCode</td>
                                 <td>@m.discount TL</td>
-                                <td style="@((m.isActive == true && DateTime.Now < m.expire) ? "color:green;" : "color:red")">@((m.isActive == true && DateTime.Now < m.expired) ? "Aktif" : "Pasif")</td>
+                                <td style="@((m.isActive == true && DateTime.Now < m.expire) ? "color:green;" : "color:red")">@((m.isActive == true && DateTime.Now < m.expire) ? "Aktif" : "Pasif")</td>
 
                             </tr>
 

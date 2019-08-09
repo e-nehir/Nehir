@@ -62,6 +62,7 @@
           <Property Name="paymentType" Type="int" />
           <Property Name="ShipPrice" Type="decimal" Precision="18" Scale="0" />
           <Property Name="OrderPrice" Type="decimal" Precision="18" Scale="0" />
+          <Property Name="discontPrice" Type="decimal" Precision="7" Scale="2" />
         </EntityType>
         <EntityType Name="Payment">
           <Key>
@@ -634,6 +635,7 @@
           <NavigationProperty Name="orderDetals" Relationship="goldstoreModel.fkOrders" FromRole="orders" ToRole="orderDetals" />
           <NavigationProperty Name="user" Relationship="goldstoreModel.FK__orders__customer__239E4DCF" FromRole="orders" ToRole="user" />
           <NavigationProperty Name="Payment" Relationship="goldstoreModel.FK__orders__paymentT__38996AB5" FromRole="orders" ToRole="Payment" />
+          <Property Name="discontPrice" Type="Decimal" Precision="7" Scale="2" />
         </EntityType>
         <Association Name="fkOrders">
           <End Type="goldstoreModel.orders" Role="orders" Multiplicity="1" />
@@ -798,6 +800,7 @@
           <EntitySetMapping Name="orders">
             <EntityTypeMapping TypeName="goldstoreModel.orders">
               <MappingFragment StoreEntitySet="orders">
+                <ScalarProperty Name="discontPrice" ColumnName="discontPrice" />
                 <ScalarProperty Name="OrderPrice" ColumnName="OrderPrice" />
                 <ScalarProperty Name="ShipPrice" ColumnName="ShipPrice" />
                 <ScalarProperty Name="paymentType" ColumnName="paymentType" />
